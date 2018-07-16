@@ -3,7 +3,7 @@ from shallowAE import ShallowAE
 import numpy as np
 from keras.models import Model, load_model
 from keras.layers import Input, Dense, Flatten, Reshape, LeakyReLU, BatchNormalization, Activation
-from keras import losses, regularizers, metrics
+from keras import losses, regularizers, metrics, constraints
 import keras.utils 
 import h5py
 import custom_regularizers
@@ -11,7 +11,9 @@ import datetime
 
 class Sparse_NonNeg_ShallowAE_KL_AsymDecay(ShallowAE):
     
-    def __init__(self, latent_dim=100, sparsity_weight=1, sparsity_objective=0.1, decay_positive_weights=0, decay_negative_weights=1, decay_weight=1):
+    def __init__(self, latent_dim=100, nb_input_channels=1, one_channel_output=True, 
+                    sparsity_weight=1, sparsity_objective=0.1, 
+                    decay_positive_weights=0, decay_negative_weights=1, decay_weight=1):
         """
         Create a sparse shallow AE with the custom kl divergence regularizer, enforcing weights non negativity with an asymmetric decay.
         Arguments:
@@ -22,19 +24,29 @@ class Sparse_NonNeg_ShallowAE_KL_AsymDecay(ShallowAE):
             decay_weight: positive float - the weight of the whole non negativity cost.
         """
         self.latent_dim = latent_dim
+        self.nb_input_channels=nb_input_channels
+        if one_channel_output:
+            self.nb_output_channels=1
+        else:
+            self.nb_output_channels=nb_input_channels
         self.sparsity_weight = sparsity_weight
         self.sparsity_objective = sparsity_objective
         self.decay_positive_weights = decay_positive_weights        
         self.decay_negative_weights = decay_negative_weights
         self.decay_weight = decay_weight
-        input_img = Input(shape=(28, 28, 1))  # adapt this if using `channels_first` image data format
+        input_img = Input(shape=(28, 28, nb_input_channels))  # adapt this if using `channels_first` image data format
         x = Flatten()(input_img)
-        encoded = Dense(latent_dim, activation='sigmoid', activity_regularizer=custom_regularizers.KL_divergence(beta=self.sparsity_weight, rho=self.sparsity_objective), kernel_regularizer=custom_regularizers.asymmetric_weight_decay(alpha=self.decay_positive_weights, beta=self.decay_negative_weights, lam=self.decay_weight))(x)
+        encoded = Dense(latent_dim, activation='sigmoid', 
+                        activity_regularizer=custom_regularizers.KL_divergence(beta=self.sparsity_weight, 
+                                                                                rho=self.sparsity_objective), 
+                        kernel_regularizer=custom_regularizers.asymmetric_weight_decay(alpha=self.decay_positive_weights, 
+                                                                                        beta=self.decay_negative_weights, 
+                                                                                        lam=self.decay_weight))(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
-        x = Dense(28*28)(encoded_img)
+        x = Dense(28*28*self.nb_output_channels)(encoded_img)
         x = LeakyReLU(alpha=0.1)(x)
-        decoded = Reshape((28,28,1))(x)
+        decoded = Reshape((28,28,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
@@ -53,7 +65,9 @@ class Sparse_NonNeg_ShallowAE_KL_AsymDecay(ShallowAE):
         loaded_AE.autoencoder = load_model(model_path, custom_objects=dict({'KL_divergence':custom_regularizers.KL_divergence, 'asymmetric_weight_decay':custom_regularizers.asymmetric_weight_decay}, **custom_objects))
         loaded_AE.encoder = loaded_AE.autoencoder.layers[1]
         loaded_AE.decoder = loaded_AE.autoencoder.layers[2]
-        loaded_AE.latent_dim = loaded_AE.encoder.output_shape[1]        
+        loaded_AE.latent_dim = loaded_AE.encoder.output_shape[1]
+        loaded_AE.nb_input_channels = loaded_AE.encoder.input_shape[-1]
+        loaded_AE.nb_output_channels = loaded_AE.decoder.output_shape[-1]        
         loaded_AE.sparsity_weight = loaded_AE.encoder.get_config()['layers'][2]['config']['activity_regularizer']['config']['beta']
         loaded_AE.sparsity_objective = loaded_AE.encoder.get_config()['layers'][2]['config']['activity_regularizer']['config']['rho']
         loaded_AE.decay_positive_weights = loaded_AE.encoder.get_config()['layers'][2]['config']['kernel_regularizer']['config']['alpha']
@@ -74,7 +88,8 @@ class Sparse_NonNeg_ShallowAE_KL_AsymDecay(ShallowAE):
 
 class Sparse_NonNeg_ShallowAE_KL_NonNegConstraint(ShallowAE):
     
-    def __init__(self, latent_dim=100, sparsity_weight=1, sparsity_objective=0.1):
+    def __init__(self, latent_dim=100, nb_input_channels=1, one_channel_output=True, 
+                    sparsity_weight=1, sparsity_objective=0.1):
         """
         Create a sparse shallow AE with the custom kl divergence regularizer, enforcing weights non negativity with Keras NonNeg constraint.
         Arguments:
@@ -82,22 +97,30 @@ class Sparse_NonNeg_ShallowAE_KL_NonNegConstraint(ShallowAE):
             sparsity_objective: float between 0 and 1 - the sparsity parameter.
         """
         self.latent_dim = latent_dim
+        self.nb_input_channels=nb_input_channels
+        if one_channel_output:
+            self.nb_output_channels=1
+        else:
+            self.nb_output_channels=nb_input_channels
         self.sparsity_weight = sparsity_weight
         self.sparsity_objective = sparsity_objective
-        input_img = Input(shape=(28, 28, 1))  # adapt this if using `channels_first` image data format
+        input_img = Input(shape=(28, 28, nb_input_channels))  # adapt this if using `channels_first` image data format
         x = Flatten()(input_img)
-        encoded = Dense(latent_dim, activation='sigmoid', activity_regularizer=custom_regularizers.KL_divergence(beta=self.sparsity_weight, rho=self.sparsity_objective), kernel_constraint=constraints.non_neg())(x)
+        encoded = Dense(latent_dim, activation='sigmoid', 
+                            activity_regularizer=custom_regularizers.KL_divergence(beta=self.sparsity_weight,  
+                                                                                    rho=self.sparsity_objective), 
+                            kernel_constraint=constraints.non_neg())(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
-        x = Dense(28*28)(encoded_img)
+        x = Dense(28*28*self.nb_output_channels)(encoded_img)
         x = LeakyReLU(alpha=0.1)(x)
-        decoded = Reshape((28,28,1))(x)
+        decoded = Reshape((28,28,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
         self.autoencoder = Model(input_img, decoded)
         self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
-
+        
     @classmethod
     def load(cls, model_name, custom_objects={}, path_to_model_directory="../ShallowAE/"):
         """
@@ -111,6 +134,8 @@ class Sparse_NonNeg_ShallowAE_KL_NonNegConstraint(ShallowAE):
         loaded_AE.encoder = loaded_AE.autoencoder.layers[1]
         loaded_AE.decoder = loaded_AE.autoencoder.layers[2]
         loaded_AE.latent_dim = loaded_AE.encoder.output_shape[1]        
+        loaded_AE.nb_input_channels = loaded_AE.encoder.input_shape[-1]
+        loaded_AE.nb_output_channels = loaded_AE.decoder.output_shape[-1]        
         loaded_AE.sparsity_weight = loaded_AE.encoder.get_config()['layers'][2]['config']['activity_regularizer']['config']['beta']
         loaded_AE.sparsity_objective = loaded_AE.encoder.get_config()['layers'][2]['config']['activity_regularizer']['config']['rho']
         return loaded_AE
@@ -128,7 +153,8 @@ class Sparse_NonNeg_ShallowAE_KL_NonNegConstraint(ShallowAE):
 
 class Sparse_NonNeg_ShallowAE_L1_AsymDecay(ShallowAE):
     
-    def __init__(self, latent_dim=100, sparsity_weight=1, decay_positive_weights=0, decay_negative_weights=1, decay_weight=1):
+    def __init__(self, latent_dim=100, nb_input_channels=1, one_channel_output=True, 
+                    sparsity_weight=1, decay_positive_weights=0, decay_negative_weights=1, decay_weight=1):
         """
         Create a sparse shallow AE with the custom kl divergence regularizer, enforcing Non Negativity with asymmetric weight decay.
         Arguments:
@@ -138,18 +164,27 @@ class Sparse_NonNeg_ShallowAE_L1_AsymDecay(ShallowAE):
             decay_weight: positive float - the weight of the whole non negativity cost.
         """
         self.latent_dim = latent_dim
+        self.nb_input_channels=nb_input_channels
+        if one_channel_output:
+            self.nb_output_channels=1
+        else:
+            self.nb_output_channels=nb_input_channels
         self.sparsity_weight = sparsity_weight
         self.decay_positive_weights = decay_positive_weights        
         self.decay_negative_weights = decay_negative_weights
         self.decay_weight = decay_weight
-        input_img = Input(shape=(28, 28, 1))  # adapt this if using `channels_first` image data format
+        input_img = Input(shape=(28, 28, nb_input_channels))  # adapt this if using `channels_first` image data format
         x = Flatten()(input_img)
-        encoded = Dense(latent_dim, activation='sigmoid', activity_regularizer=regularizers.l1(self.sparsity_weight), kernel_regularizer=custom_regularizers.asymmetric_weight_decay(alpha=self.decay_positive_weights, beta=self.decay_negative_weights, lam=self.decay_weight))(x)
+        encoded = Dense(latent_dim, activation='sigmoid', 
+                            activity_regularizer=regularizers.l1(self.sparsity_weight), 
+                            kernel_regularizer=custom_regularizers.asymmetric_weight_decay(alpha=self.decay_positive_weights, 
+                                                                                            beta=self.decay_negative_weights, 
+                                                                                            lam=self.decay_weight))(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
-        x = Dense(28*28)(encoded_img)
+        x = Dense(28*28*self.nb_output_channels)(encoded_img)
         x = LeakyReLU(alpha=0.1)(x)
-        decoded = Reshape((28,28,1))(x)
+        decoded = Reshape((28,28,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
@@ -168,7 +203,9 @@ class Sparse_NonNeg_ShallowAE_L1_AsymDecay(ShallowAE):
         loaded_AE.autoencoder = load_model(model_path, custom_objects=dict({'asymmetric_weight_decay':custom_regularizers.asymmetric_weight_decay}, **custom_objects))
         loaded_AE.encoder = loaded_AE.autoencoder.layers[1]
         loaded_AE.decoder = loaded_AE.autoencoder.layers[2]
-        loaded_AE.latent_dim = loaded_AE.encoder.output_shape[1]        
+        loaded_AE.latent_dim = loaded_AE.encoder.output_shape[1]
+        loaded_AE.nb_input_channels = loaded_AE.encoder.input_shape[-1]
+        loaded_AE.nb_output_channels = loaded_AE.decoder.output_shape[-1]          
         loaded_AE.sparsity_weight = loaded_AE.encoder.get_config()['layers'][2]['config']['activity_regularizer']['config']['l1']
         loaded_AE.decay_positive_weights = loaded_AE.encoder.get_config()['layers'][2]['config']['kernel_regularizer']['config']['alpha']
         loaded_AE.decay_negative_weights = loaded_AE.encoder.get_config()['layers'][2]['config']['kernel_regularizer']['config']['beta']
@@ -188,28 +225,35 @@ class Sparse_NonNeg_ShallowAE_L1_AsymDecay(ShallowAE):
 
 class Sparse_NonNeg_ShallowAE_L1_NonNegConstraint(ShallowAE):
     
-    def __init__(self, latent_dim=100, sparsity_weight=1):
+    def __init__(self, latent_dim=100, nb_input_channels=1, one_channel_output=True, sparsity_weight=1):
         """
         Create a sparse shallow AE with the custom kl divergence regularizer.
         Arguments:
             sparsity_weight: positive float - the weight of the sparsity cost.
         """
         self.latent_dim = latent_dim
+        self.nb_input_channels=nb_input_channels
+        if one_channel_output:
+            self.nb_output_channels=1
+        else:
+            self.nb_output_channels=nb_input_channels
         self.sparsity_weight = sparsity_weight
-        input_img = Input(shape=(28, 28, 1))  # adapt this if using `channels_first` image data format
+        input_img = Input(shape=(28, 28, nb_input_channels))  # adapt this if using `channels_first` image data format
         x = Flatten()(input_img)
-        encoded = Dense(latent_dim, activation='sigmoid', activity_regularizer=regularizers.l1(self.sparsity_weight), kernel_constraint=constraints.non_neg())(x)
+        encoded = Dense(latent_dim, activation='sigmoid', 
+                        activity_regularizer=regularizers.l1(self.sparsity_weight), 
+                        kernel_constraint=constraints.non_neg())(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
-        x = Dense(28*28)(encoded_img)
+        x = Dense(28*28*self.nb_output_channels)(encoded_img)
         x = LeakyReLU(alpha=0.1)(x)
-        decoded = Reshape((28,28,1))(x)
+        decoded = Reshape((28,28,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
         self.autoencoder = Model(input_img, decoded)
         self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
-
+        
     @classmethod
     def load(cls, model_name, custom_objects={}, path_to_model_directory="../ShallowAE/"):
         """
@@ -223,6 +267,8 @@ class Sparse_NonNeg_ShallowAE_L1_NonNegConstraint(ShallowAE):
         loaded_AE.encoder = loaded_AE.autoencoder.layers[1]
         loaded_AE.decoder = loaded_AE.autoencoder.layers[2]
         loaded_AE.latent_dim = loaded_AE.encoder.output_shape[1]        
+        loaded_AE.nb_input_channels = loaded_AE.encoder.input_shape[-1]
+        loaded_AE.nb_output_channels = loaded_AE.decoder.output_shape[-1]
         loaded_AE.sparsity_weight = loaded_AE.encoder.get_config()['layers'][2]['config']['activity_regularizer']['config']['l1']
         return loaded_AE
 
@@ -249,20 +295,31 @@ class Sparse_NonNeg_ShallowAE_KLsum_AsymDecay(ShallowAE):
             decay_negative_weights: positive float - the weight decay parameter for the negative weights.
             decay_weight: positive float - the weight of the whole non negativity cost.
         """
+        nb_input_channels=1, one_channel_output=True):
         self.latent_dim = latent_dim
+        self.nb_input_channels=nb_input_channels
+        if one_channel_output:
+            self.nb_output_channels=1
+        else:
+            self.nb_output_channels=nb_input_channels
         self.sparsity_weight = sparsity_weight
         self.sparsity_objective = sparsity_objective
         self.decay_positive_weights = decay_positive_weights        
         self.decay_negative_weights = decay_negative_weights
         self.decay_weight = decay_weight
-        input_img = Input(shape=(28, 28, 1))  # adapt this if using `channels_first` image data format
+        input_img = Input(shape=(28, 28, nb_input_channels))  # adapt this if using `channels_first` image data format
         x = Flatten()(input_img)
-        encoded = Dense(latent_dim, activation='sigmoid', activity_regularizer=custom_regularizers.KL_divergence_sum(beta=self.sparsity_weight, rho=self.sparsity_objective), kernel_regularizer=custom_regularizers.asymmetric_weight_decay(alpha=self.decay_positive_weights, beta=self.decay_negative_weights, lam=self.decay_weight))(x)
+        encoded = Dense(latent_dim, activation='sigmoid', 
+                            activity_regularizer=custom_regularizers.KL_divergence_sum(beta=self.sparsity_weight, 
+                                                                                        rho=self.sparsity_objective), 
+                            kernel_regularizer=custom_regularizers.asymmetric_weight_decay(alpha=self.decay_positive_weights, 
+                                                                                            beta=self.decay_negative_weights, 
+                                                                                            lam=self.decay_weight))(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
-        x = Dense(28*28)(encoded_img)
+        x = Dense(28*28*self.nb_output_channels)(encoded_img)
         x = LeakyReLU(alpha=0.1)(x)
-        decoded = Reshape((28,28,1))(x)
+        decoded = Reshape((28,28,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
@@ -282,6 +339,8 @@ class Sparse_NonNeg_ShallowAE_KLsum_AsymDecay(ShallowAE):
         loaded_AE.encoder = loaded_AE.autoencoder.layers[1]
         loaded_AE.decoder = loaded_AE.autoencoder.layers[2]
         loaded_AE.latent_dim = loaded_AE.encoder.output_shape[1]        
+        loaded_AE.nb_input_channels = loaded_AE.encoder.input_shape[-1]
+        loaded_AE.nb_output_channels = loaded_AE.decoder.output_shape[-1]
         loaded_AE.sparsity_weight = loaded_AE.encoder.get_config()['layers'][2]['config']['activity_regularizer']['config']['beta']
         loaded_AE.sparsity_objective = loaded_AE.encoder.get_config()['layers'][2]['config']['activity_regularizer']['config']['rho']
         loaded_AE.decay_positive_weights = loaded_AE.encoder.get_config()['layers'][2]['config']['kernel_regularizer']['config']['alpha']
@@ -302,7 +361,7 @@ class Sparse_NonNeg_ShallowAE_KLsum_AsymDecay(ShallowAE):
 
 class Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint(ShallowAE):
     
-    def __init__(self, latent_dim=100, sparsity_weight=0.1, sparsity_objective=0.1):
+    def __init__(self, latent_dim=100, nb_input_channels=1, one_channel_output=True, sparsity_weight=0.1, sparsity_objective=0.1):
         """
         Create a sparse shallow AE with the custom kl divergence regularizer, enforcing weights non negativity with Keras NonNeg constraint.
         Arguments:
@@ -310,22 +369,30 @@ class Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint(ShallowAE):
             sparsity_objective: float between 0 and 1 - the sparsity parameter.
         """
         self.latent_dim = latent_dim
+        self.nb_input_channels=nb_input_channels
+        if one_channel_output:
+            self.nb_output_channels=1
+        else:
+            self.nb_output_channels=nb_input_channels
         self.sparsity_weight = sparsity_weight
         self.sparsity_objective = sparsity_objective
-        input_img = Input(shape=(28, 28, 1))  # adapt this if using `channels_first` image data format
+        input_img = Input(shape=(28, 28, nb_input_channels))  # adapt this if using `channels_first` image data format
         x = Flatten()(input_img)
-        encoded = Dense(latent_dim, activation='sigmoid', activity_regularizer=custom_regularizers.KL_divergence_sum(beta=self.sparsity_weight, rho=self.sparsity_objective), kernel_constraint=constraints.non_neg())(x)
+        encoded = Dense(latent_dim, activation='sigmoid', 
+                            activity_regularizer=custom_regularizers.KL_divergence_sum(beta=self.sparsity_weight, 
+                                                                                        rho=self.sparsity_objective), 
+                            kernel_constraint=constraints.non_neg())(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
-        x = Dense(28*28)(encoded_img)
+        x = Dense(28*28*self.nb_output_channels)(encoded_img)
         x = LeakyReLU(alpha=0.1)(x)
-        decoded = Reshape((28,28,1))(x)
+        decoded = Reshape((28,28,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
         self.autoencoder = Model(input_img, decoded)
         self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
-
+        
     @classmethod
     def load(cls, model_name, custom_objects={}, path_to_model_directory="../ShallowAE/"):
         """
@@ -339,6 +406,8 @@ class Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint(ShallowAE):
         loaded_AE.encoder = loaded_AE.autoencoder.layers[1]
         loaded_AE.decoder = loaded_AE.autoencoder.layers[2]
         loaded_AE.latent_dim = loaded_AE.encoder.output_shape[1]        
+        loaded_AE.nb_input_channels = loaded_AE.encoder.input_shape[-1]
+        loaded_AE.nb_output_channels = loaded_AE.decoder.output_shape[-1]
         loaded_AE.sparsity_weight = loaded_AE.encoder.get_config()['layers'][2]['config']['activity_regularizer']['config']['beta']
         loaded_AE.sparsity_objective = loaded_AE.encoder.get_config()['layers'][2]['config']['activity_regularizer']['config']['rho']
         return loaded_AE

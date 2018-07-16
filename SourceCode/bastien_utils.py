@@ -14,18 +14,6 @@ import sys
 sys.path.append('../fashion_mnist')
 from utils import mnist_reader
 
-def load_AE(path, custom_objects={}):
-    """
-    Load a autoencoder previously saved as a h5 file.
-    Custom_objects is a dictionary resolving the names of all the custom objects used during the creation of the model. 
-    Returns the autoencoder, the encoder and the decoders models, assuming the two latters are respectively the second and the third layer of the AE model.
-    """
-    autoencoder = load_model(path, custom_objects=custom_objects)
-    encoder = autoencoder.layers[1]
-    decoder = autoencoder.layers[2]
-    return autoencoder, encoder, decoder
-
-
 def load_data(filePath, train=True, test=True, subsetTest=False, subsetSize=10):
     """
     Load the FashionMNIST data set. 
@@ -34,24 +22,19 @@ def load_data(filePath, train=True, test=True, subsetTest=False, subsetSize=10):
     If test=True, returns the full test set (x_test and y_test two last items in the list). 
     If test=False, returns a small subset of the test set, of size subsetSize and with a balance number of images from each class (one from each with  subsetSize = 10)
     """
-
     ret=[]    
-
     if (train==True):
         x_train, y_train = mnist_reader.load_mnist(filePath + 'fashion_mnist/data/fashion', kind='train')
         x_train = x_train.astype('float32') / 255.
         x_train = np.reshape(x_train, (len(x_train), 28, 28, 1))  # adapt this if using `channels_first` image data format
         ret.append(x_train)
         ret.append(y_train)
-
     x_test, y_test = mnist_reader.load_mnist(filePath + 'fashion_mnist/data/fashion', kind='t10k')
     x_test = x_test.astype('float32') / 255.
     x_test = np.reshape(x_test, (len(x_test), 28, 28, 1))  # adapt this if using `channels_first` image data format
-
     if (test==True):    
         ret.append(x_test)
         ret.append(y_test)
-
     if subsetTest:
         x_test_small = np.zeros((subsetSize, 28,28,1))
         y_test_small = np.zeros(subsetSize)
@@ -68,10 +51,8 @@ def load_data(filePath, train=True, test=True, subsetTest=False, subsetSize=10):
 def plot_embedding(X, title=None):
     x_min, x_max = np.min(X, 0), np.max(X, 0)
     X = (X - x_min) / (x_max - x_min)
-
     plt.figure(figsize=(20, 20))
     ax = plt.subplot(111)
-
     if hasattr(offsetbox, 'AnnotationBbox'):
         shown_images = np.array([[1., 1.]])
         for i in range(X.shape[0]):
@@ -84,6 +65,20 @@ def plot_embedding(X, title=None):
             ax.add_artist(imagebox)
     if title is not None:
         plt.title(title)
+
+
+# The following function are deprecated, equivalents exist in the ShallowAE class
+ 
+def load_AE(path, custom_objects={}):
+    """
+    Load a autoencoder previously saved as a h5 file.
+    Custom_objects is a dictionary resolving the names of all the custom objects used during the creation of the model. 
+    Returns the autoencoder, the encoder and the decoders models, assuming the two latters are respectively the second and the third layer of the AE model.
+    """
+    autoencoder = load_model(path, custom_objects=custom_objects)
+    encoder = autoencoder.layers[1]
+    decoder = autoencoder.layers[2]
+    return autoencoder, encoder, decoder
 
 def atom_images(encoder):
     """

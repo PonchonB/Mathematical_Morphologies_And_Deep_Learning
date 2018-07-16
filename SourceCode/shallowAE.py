@@ -13,17 +13,21 @@ from sklearn.svm import SVC
 
 class ShallowAE:
 
-    def __init__(self, latent_dim=100, n_channels=1):
+    def __init__(self, latent_dim=100, nb_input_channels=1, one_channel_output=True):
         self.latent_dim = latent_dim
-        self.n_channels=n_channels
-        input_img = Input(shape=(28, 28, n_channels))  # adapt this if using `channels_first` image data format
+        self.nb_input_channels=nb_input_channels
+        if one_channel_output:
+            self.nb_output_channels=1
+        else:
+            self.nb_output_channels=nb_input_channels
+        input_img = Input(shape=(28, 28, nb_input_channels))  # adapt this if using `channels_first` image data format
         x = Flatten()(input_img)
         encoded = Dense(latent_dim, activation='sigmoid')(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
-        x = Dense(28*28*n_channels)(encoded_img)
+        x = Dense(28*28*self.nb_output_channels)(encoded_img)
         x = LeakyReLU(alpha=0.1)(x)
-        decoded = Reshape((28,28,n_channels))(x)
+        decoded = Reshape((28,28,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
@@ -44,7 +48,8 @@ class ShallowAE:
         loaded_AE.encoder = loaded_AE.autoencoder.layers[1]
         loaded_AE.decoder = loaded_AE.autoencoder.layers[2]
         loaded_AE.latent_dim = loaded_AE.encoder.output_shape[1]
-        loaded_AE.n_channels = loaded_AE.encoder.input_shape[-1]
+        loaded_AE.nb_input_channels = loaded_AE.encoder.input_shape[-1]
+        loaded_AE.nb_output_channels = loaded_AE.decoder.output_shape[-1]
         return loaded_AE
         
     def train(self, X_train, nb_epochs=100, X_val=None, verbose=1):
@@ -94,12 +99,12 @@ class ShallowAE:
             AE: an autoencoder.
             X: a numpy array of shape (10, 28, 28, nb_channels)
         """
-        try:
+        if (channel_to_plot < self.nb_output_channels):
             X_rec = self.reconstruction(X_test)[:,:,:,channel_to_plot]
-        except IndexError:
+        else:
             print('Too big channel number...plotting channel 0 instead...')
             channel_to_plot=0
-            X_rec = self.reconstruction(X_test)[:,:,:,0]            
+            X_rec = self.reconstruction(X_test)[:,:,:,0]
         plt.figure(figsize=(20, 4))
         for i in range(10):
             # display original
@@ -117,33 +122,76 @@ class ShallowAE:
             ax.get_yaxis().set_visible(False)    
         plt.show()
         
-    def atom_images(self):
+    def atom_images_encoder(self):
         """
-        Return the atom images of a shallow encoder.
+        Return the atom images of the encoder : normalized weights. 
+        Corresponds to the artificial input images that maximize each of the code coefficients.
         """
         W= self.encoder.get_weights()[0]
         nbAtoms = W.shape[1]
+        W = np.reshape(W, (28*28, self.nb_input_channels, nbAtoms))
         W = keras.utils.normalize(W, axis=0, order=2)
-        atoms = W.reshape((28,28, self.n_channels, nbAtoms))
+        atoms = W.reshape((28,28, self.nb_input_channels, nbAtoms))
+        return atoms
+
+    def atom_images_decoder(self, add_bias=True):
+        """
+        Return the atom images of the encoder : normalized weights.
+        """
+        W= self.decoder.get_weights()[0]
+        if add_bias:
+            W = W + self.decoder.get_weights()[1] 
+        W = np.transpose(W)
+        nbAtoms = W.shape[1]
+        W = np.reshape(W, (28*28, self.nb_output_channels, nbAtoms))
+        W = keras.utils.normalize(W, axis=0, order=2)
+        atoms = W.reshape((28,28, self.nb_output_channels, nbAtoms))
         return atoms
     
-    def plot_atoms(self, channel_to_plot=0, nb_to_plot=-1):
+    def plot_atoms_encoder(self, channel_to_plot=0, nb_to_plot=-1):
         """
-        Plot the weights of a shallow encoder.
-
-        Arguments: 
-           encode: shallow encoder.
+        Plot the weights of the encoder.
+        Arguments:
            nb_to_plot: number of basis images to plot, -1 is all, otherwise plot the nb_to_plot first ones.
-           channel: channel to plot (there are n_channels*nb_atoms atoms)
+           channel: channel to plot (there are nb_input_channels*nb_atoms atoms)
         """
-        try:
-            atoms = self.atom_images()[:,:,channel_to_plot, :]
-        except IndexError:
+        if (channel_to_plot < self.nb_output_channels):
+            atoms = self.atom_images_encoder()[:,:,channel_to_plot, :]
+        else:
             print('Too big channel number...plotting channel 0 instead...')
-            atoms = self.atom_images()[:,:,0, :]
-            
+            channel_to_plot=0
+            atoms = self.atom_images_encoder()[:,:,0, :]
         if (nb_to_plot<0):
-            n_atoms = atoms.shape[2]
+            n_atoms = atoms.shape[3]
+        else:
+            n_atoms=nb_to_plot
+        n_columns = min(10, n_atoms)
+        n_rows = int(n_atoms/10) +1   
+        plt.figure(figsize=(n_columns*2,n_rows*2))
+        for i in range(n_atoms):
+            ax = plt.subplot(n_rows, n_columns, i + 1)
+            plt.imshow(atoms[:, :,i])
+            plt.gray()
+            ax.get_xaxis().set_visible(False)
+            ax.get_yaxis().set_visible(False)
+        plt.show()
+
+    def plot_atoms_decoder(self, channel_to_plot=0, nb_to_plot=-1, add_bias=True):
+        """
+        Plot the weights of the decoder.
+        Arguments:
+           nb_to_plot: number of basis images to plot, -1 is all, otherwise plot the nb_to_plot first ones.
+           channel: channel to plot (there are nb_input_channels*nb_atoms atoms)
+           add_bias: bool, whether to add the bias (784,) to the weights.
+        """
+        if (channel_to_plot < self.nb_output_channels):
+            atoms = self.atom_images_decoder(add_bias=add_bias)[:,:,channel_to_plot, :]
+        else:
+            print('Too big channel number...plotting channel 0 instead...')
+            channel_to_plot=0
+            atoms = self.atom_images_decoder(add_bias=add_bias)[:,:,0, :]
+        if (nb_to_plot<0):
+            n_atoms = atoms.shape[3]
         else:
             n_atoms=nb_to_plot
         n_columns = min(10, n_atoms)

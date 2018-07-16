@@ -61,9 +61,7 @@ def AdditiveDecomposition(input_im,levels=4,step=1, init_step=2):
 
 
 def AdditiveDecomposition2(input_im,levels=4,step=1, init_step=2):
-    """Additive Decomposition by Reconstruction.
-	Version from Santiago Tutorial
-    
+    """Additive Decomposition by Reconstruction. Other version. Not used in the following functions.
     Arguments:
     input_im: numpy array.
     levels: number of levels in the decomposition.
@@ -73,9 +71,9 @@ def AdditiveDecomposition2(input_im,levels=4,step=1, init_step=2):
     RN=[]
     SE=init_step
     for i in range(levels):
-        out_im=OpenbyRec2(input_im,SE)
+        out_im=OpenbyRec(input_im,SE)
         RP.append(input_im-out_im)
-        out2_im=ClosebyRec2(out_im,SE)
+        out2_im=ClosebyRec(out_im,SE)
         RN.append(out2_im-out_im)
         input_im=out2_im
         SE=SE+step
@@ -101,6 +99,10 @@ def AMD(X,levels=4,step=1, init_step=1):
     return R,S
 
 def AMD_in_one_array(X, levels=4,step=1, init_step=1):
+    """
+    AMD of the set of images X of shape (N_images, N_rows, N_columns)
+    Returns the transformed data, in the shape (N_images, N_rows, N_columns, N_AMD_element)
+    """
     R,S = AMD(X, levels=levels,step=step, init_step=init_step)
     nb_images, nb_rows, nb_columns = X.shape
     amd = np.concatenate((X.reshape((nb_images, nb_rows, nb_columns, 1)), R, S.reshape((nb_images, nb_rows, nb_columns, 1))), axis=3)

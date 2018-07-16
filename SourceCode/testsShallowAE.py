@@ -1,5 +1,5 @@
 import numpy as np
-import pandas as pd
+#import pandas as pd
 import bastien_utils
 from shallowAE import ShallowAE
 from sparseShallowAE import SparseShallowAE_KL, SparseShallowAE_L1
@@ -9,8 +9,12 @@ PATH_TO_MODELS_DIR = "../ShallowAE/"
 PATH_TO_DATA = "../"
 
 def testShallowAE(latent_dimensions=[100], nb_epochs=200, svm=False, path_to_dir = "../ShallowAE/"):
+    """
+    Test the auto-encoder with the given set of latent dimension.
+    Print training errors, test errors, dimension and svm classification error (if svm==True).
+    """
     data = bastien_utils.load_data(PATH_TO_DATA, train=True, test=True, subsetTest=False)
-    x_train, ytrain, x_test, y_test = data
+    x_train, _, x_test, y_test = data
     d = datetime.date.today()
     strDims = str(latent_dimensions[0]) + "_" + str(latent_dimensions[-1]) 
     strDate = d.strftime("%y_%m_%d")
