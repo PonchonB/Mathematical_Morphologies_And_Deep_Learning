@@ -53,14 +53,10 @@ class SparseShallowAE_KL(ShallowAE):
         model_path = path_to_directory + model_name
         loaded_AE = cls()
         loaded_AE.autoencoder = load_model(model_path, custom_objects=dict({'KL_divergence':custom_regularizers.KL_divergence}, **custom_objects))
-        loaded_AE.encoder = loaded_AE.autoencoloaded_AE.nb_input_channels = loaded_AE.encoder.input_shape[-1]
-        loaded_AE.nb_output_channels = loaded_AE.decoder.output_shape[-1]der.layers[1]
-        loaded_AE.decoder = loaded_AE.autoencoloaded_AE.nb_input_channels = loaded_AE.encoder.input_shape[-1]
-        loaded_AE.nb_output_channels = loaded_AE.decoder.output_shape[-1]der.layers[2]
-        loaded_AE.latent_dim = loaded_AE.encodloaded_AE.nb_input_channels = loaded_AE.encoder.input_shape[-1]
-        loaded_AE.nb_output_channels = loaded_AE.decoder.output_shape[-1]er.output_shape[1]
-        loaded_AE.nb_input_channels = loaded_Aloaded_AE.nb_input_channels = loaded_AE.encoder.input_shape[-1]
-        loaded_AE.nb_output_channels = loaded_AE.decoder.output_shape[-1]E.encoder.input_shape[-1]
+        loaded_AE.encoder = loaded_AE.autoencoder.layers[1]
+        loaded_AE.decoder = loaded_AE.autoencoder.layers[2]
+        loaded_AE.latent_dim = loaded_AE.encoder.output_shape[1]
+        loaded_AE.nb_input_channels = loaded_AE.encoder.input_shape[-1]
         loaded_AE.nb_output_channels = loaded_AE.decoder.output_shape[-1]        
         loaded_AE.sparsity_weight = loaded_AE.encoder.get_config()['layers'][2]['config']['activity_regularizer']['config']['beta']
         loaded_AE.sparsity_objective = loaded_AE.encoder.get_config()['layers'][2]['config']['activity_regularizer']['config']['rho']
@@ -156,9 +152,9 @@ class SparseShallowAE_KL_sum(ShallowAE):
         self.sparsity_objective = sparsity_objective
         input_img = Input(shape=(28, 28, nb_input_channels))  # adapt this if using `channels_first` image data format
         x = Flatten()(input_img)
-                encoded = Dense(latent_dim, activation='sigmoid', 
-                                activity_regularizer=custom_regularizers.KL_divergence_sum(beta=self.sparsity_weight,
-                                                                                            rho=self.sparsity_objective))(x)
+        encoded = Dense(latent_dim, activation='sigmoid', 
+                        activity_regularizer=custom_regularizers.KL_divergence_sum(beta=self.sparsity_weight,
+                                                                                    rho=self.sparsity_objective))(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
         x = Dense(28*28*self.nb_output_channels)(encoded_img)
