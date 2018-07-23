@@ -89,7 +89,7 @@ class ShallowAE:
         self.autoencoder.save(model_path)
         
     def reconstruction_error(self, X_test):
-        return self.autoencoder.evaluate(X_test, X_test, verbose=0)
+        return self.autoencoder.evaluate(X_test, X_test, verbose=0, batch_size=128)
         
     def plot_reconstructions(self, X_test, channel_to_plot=0):
         """
@@ -162,7 +162,7 @@ class ShallowAE:
             channel_to_plot=0
             atoms = self.atom_images_encoder()[:,:,0, :]
         if (nb_to_plot<0):
-            n_atoms = atoms.shape[3]
+            n_atoms = atoms.shape[2]
         else:
             n_atoms=nb_to_plot
         n_columns = min(10, n_atoms)

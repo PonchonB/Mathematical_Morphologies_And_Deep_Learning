@@ -36,7 +36,7 @@ class KL_divergence_sum(Regularizer):
 
     def __call__(self, x):
         s_hat = K.mean(x, 0)
-        s_hat += 10 ** -5
+        s_hat = K.clip(s_hat, K.epsilon(), 1)
         val = self.rho * K.log(self.rho/s_hat) + (1 - self.rho) * K.log((1 - self.rho)/(1 - s_hat))
         return self.beta*K.sum(val)
 
@@ -46,6 +46,23 @@ class KL_divergence_sum(Regularizer):
 
 def kl_divergence(beta=1, rho=0.1):
     return KL_divergence(beta=beta, rho=rho)
+
+class L1(Regularizer):
+    """L1 norm for Sparsity regularization. 
+    Takes the mean of the L1 norm of the activity on the batch, instead of the sum as done in Keras (batch size dependant)
+    # Arguments
+        beta: Float; Weight of the L1_regularizer.
+    """
+
+    def __init__(self, beta=1):
+        self.beta = K.cast_to_floatx(beta)
+
+    def __call__(self, x):
+        val = K.mean(K.sum(K.abs(x), axis=1))
+        return self.beta*val
+
+    def get_config(self):
+        return {'beta': float(self.beta)}
 
 
 class asymmetric_weight_decay(Regularizer):

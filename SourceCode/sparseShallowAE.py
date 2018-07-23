@@ -41,7 +41,7 @@ class SparseShallowAE_KL(ShallowAE):
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
         self.autoencoder = Model(input_img, decoded)
-        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
+        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
 
     @classmethod
     def load(cls, model_name, custom_objects={}, path_to_model_directory="../ShallowAE/"):
@@ -91,7 +91,7 @@ class SparseShallowAE_L1(ShallowAE):
         input_img = Input(shape=(28, 28, nb_input_channels))  # adapt this if using `channels_first` image data format
         x = Flatten()(input_img)
         encoded = Dense(latent_dim, activation='sigmoid', 
-                        activity_regularizer=regularizers.l1(self.sparsity_weight))(x)
+                        activity_regularizer=custom_regularizers.L1(beta=self.sparsity_weight))(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
         x = Dense(28*28*self.nb_output_channels)(encoded_img)
@@ -101,7 +101,7 @@ class SparseShallowAE_L1(ShallowAE):
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
         self.autoencoder = Model(input_img, decoded)
-        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
+        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
 
     @classmethod
     def load(cls, model_name, custom_objects={}, path_to_model_directory="../ShallowAE/"):
@@ -112,7 +112,7 @@ class SparseShallowAE_L1(ShallowAE):
         path_to_directory = path_to_model_directory + "Sparse/L1/Models/"
         model_path = path_to_directory + model_name
         loaded_AE = cls()
-        loaded_AE.autoencoder = load_model(model_path, custom_objects=custom_objects)
+        loaded_AE.autoencoder = load_model(model_path, custom_objects=dict({'L1':custom_regularizers.L1}, **custom_objects))
         loaded_AE.encoder = loaded_AE.autoencoder.layers[1]
         loaded_AE.decoder = loaded_AE.autoencoder.layers[2]
         loaded_AE.latent_dim = loaded_AE.encoder.output_shape[1]
@@ -164,7 +164,7 @@ class SparseShallowAE_KL_sum(ShallowAE):
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
         self.autoencoder = Model(input_img, decoded)
-        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
+        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
 
     @classmethod
     def load(cls, model_name, custom_objects={}, path_to_model_directory="../ShallowAE/"):
