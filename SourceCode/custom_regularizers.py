@@ -36,7 +36,7 @@ class KL_divergence_sum(Regularizer):
 
     def __call__(self, x):
         s_hat = K.mean(x, 0)
-        s_hat += 10 ** -5
+        s_hat = K.clip(s_hat, K.epsilon(), 1)
         val = self.rho * K.log(self.rho/s_hat) + (1 - self.rho) * K.log((1 - self.rho)/(1 - s_hat))
         return self.beta*K.sum(val)
 

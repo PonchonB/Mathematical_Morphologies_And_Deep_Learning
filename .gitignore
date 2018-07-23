@@ -1,6 +1,7 @@
 AEinfoGAN.zip
 fashion_mnist/
 SourceCode/__pycache__/
+SourceCode/*.pyc
 Notebooks/.ipynb_checkpoints/
 Logs/
 

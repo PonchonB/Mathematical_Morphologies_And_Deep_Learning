@@ -89,7 +89,7 @@ class ShallowAE:
         self.autoencoder.save(model_path)
         
     def reconstruction_error(self, X_test):
-        return self.autoencoder.evaluate(X_test, X_test, verbose=0)
+        return self.autoencoder.evaluate(X_test, X_test, verbose=0, batch_size=128)
         
     def plot_reconstructions(self, X_test, channel_to_plot=0):
         """
