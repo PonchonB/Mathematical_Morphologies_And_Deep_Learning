@@ -1,5 +1,5 @@
 AEinfoGAN.zip
-./fashion_mnist/
-
-./Logs/
-
+fashion_mnist/
+SourceCode/__pycache__/
+Logs/
+Notebooks/
