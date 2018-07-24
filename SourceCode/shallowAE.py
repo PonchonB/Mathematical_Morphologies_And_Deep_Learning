@@ -13,21 +13,23 @@ from sklearn.svm import SVC
 
 class ShallowAE:
 
-    def __init__(self, latent_dim=100, nb_input_channels=1, one_channel_output=True):
+    def __init__(self, latent_dim=100, nb_rows=28, nb_columns=28, nb_input_channels=1, one_channel_output=True):
         self.latent_dim = latent_dim
         self.nb_input_channels=nb_input_channels
+        self.nb_rows=nb_rows
+        self.nb_columns=nb_columns
         if one_channel_output:
             self.nb_output_channels=1
         else:
             self.nb_output_channels=nb_input_channels
-        input_img = Input(shape=(28, 28, nb_input_channels))  # adapt this if using `channels_first` image data format
+        input_img = Input(shape=(self.nb_rows, self.nb_columns, nb_input_channels))  # adapt this if using `channels_first` image data format
         x = Flatten()(input_img)
         encoded = Dense(latent_dim, activation='sigmoid')(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
-        x = Dense(28*28*self.nb_output_channels)(encoded_img)
+        x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels)(encoded_img)
         x = LeakyReLU(alpha=0.1)(x)
-        decoded = Reshape((28,28,self.nb_output_channels))(x)
+        decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
@@ -49,15 +51,30 @@ class ShallowAE:
         loaded_AE.decoder = loaded_AE.autoencoder.layers[2]
         loaded_AE.latent_dim = loaded_AE.encoder.output_shape[1]
         loaded_AE.nb_input_channels = loaded_AE.encoder.input_shape[-1]
+        loaded_AE.nb_rows = loaded_AE.encoder.input_shape[1]
+        loaded_AE.nb_columns = loaded_AE.encoder.input_shape[2]
         loaded_AE.nb_output_channels = loaded_AE.decoder.output_shape[-1]
         return loaded_AE
         
-    def train(self, X_train, nb_epochs=100, X_val=None, verbose=1):
+    def train(self, X_train, X_train_expected_output=None, nb_epochs=100, X_val=None, verbose=1):
         if X_val is None:
             validation_data = None
+        elif type(X_val) is tuple:
+            validation_data=X_val
         else:
-            validation_data = (X_val, X_val)
-        self.autoencoder.fit(X_train, X_train,
+            if (self.nb_output_channels==self.nb_input_channels):
+                Y_val = X_val
+            else:
+                Y_val = X_val[:,:,:,0].reshape((X_val.shape[0], self.nb_rows, self.nb_columns, 1))
+            validation_data = (X_val, Y_val)
+        if X_train_expected_output is None:
+            if (self.nb_output_channels==self.nb_input_channels):
+                Y_train = X_train
+            else:
+                Y_train = X_train[:,:,:,0].reshape((X_train.shape[0], self.nb_rows, self.nb_columns, 1)) 
+        else:
+            Y_train = X_train_expected_output
+        self.autoencoder.fit(X_train, Y_train,
                 epochs=nb_epochs,
                 batch_size=128,
                 shuffle=True,
@@ -88,8 +105,27 @@ class ShallowAE:
         model_path = path_to_directory + strDate + "_dim" + str(self.latent_dim) + ".h5"
         self.autoencoder.save(model_path)
         
-    def reconstruction_error(self, X_test):
-        return self.autoencoder.evaluate(X_test, X_test, verbose=0, batch_size=128)
+    def reconstruction_error(self, X_test, X_rec_th=None):
+        if X_rec_th is None:
+            X_rec = X_test
+        else:
+            X_rec = X_rec_th
+        return self.autoencoder.evaluate(X_test, X_rec, verbose=0, batch_size=128)[1]
+        
+    def loss(self, X_test, X_rec_th=None):
+        if X_rec_th is None:
+            X_rec = X_test
+        else:
+            X_rec = X_rec_th
+        return self.autoencoder.evaluate(X_test, X_rec, verbose=0, batch_size=128)
+
+    def total_loss(self, X_test, X_rec_th=None):
+        if X_rec_th is None:
+            if (self.nb_output_channels==1):
+                X_rec = X_test[:,:,:,0].reshape(self.)
+        else:
+            X_rec = X_rec_th
+        return self.autoencoder.evaluate(X_test, X_rec, verbose=0, batch_size=128)[0]
         
     def plot_reconstructions(self, X_test, channel_to_plot=0):
         """
@@ -122,7 +158,7 @@ class ShallowAE:
             ax.get_yaxis().set_visible(False)    
         plt.show()
         
-    def atom_images_encoder(self):
+    def atom_images_encoder(self, normalize=True):
         """
         Return the atom images of the encoder : normalized weights. 
         Corresponds to the artificial input images that maximize each of the code coefficients.
@@ -130,11 +166,12 @@ class ShallowAE:
         W= self.encoder.get_weights()[0]
         nbAtoms = W.shape[1]
         W = np.reshape(W, (28*28, self.nb_input_channels, nbAtoms))
-        W = keras.utils.normalize(W, axis=0, order=2)
+        if normalize:
+            W = keras.utils.normalize(W, axis=0, order=2)
         atoms = W.reshape((28,28, self.nb_input_channels, nbAtoms))
         return atoms
 
-    def atom_images_decoder(self, add_bias=True):
+    def atom_images_decoder(self, add_bias=True, normalize=True):
         """
         Return the atom images of the encoder : normalized weights.
         """
@@ -144,11 +181,12 @@ class ShallowAE:
         W = np.transpose(W)
         nbAtoms = W.shape[1]
         W = np.reshape(W, (28*28, self.nb_output_channels, nbAtoms))
-        W = keras.utils.normalize(W, axis=0, order=2)
+        if normalize:
+            W = keras.utils.normalize(W, axis=0, order=2)
         atoms = W.reshape((28,28, self.nb_output_channels, nbAtoms))
         return atoms
     
-    def plot_atoms_encoder(self, channel_to_plot=0, nb_to_plot=-1):
+    def plot_atoms_encoder(self, channel_to_plot=0, nb_to_plot=-1, normalize=True):
         """
         Plot the weights of the encoder.
         Arguments:
@@ -156,7 +194,7 @@ class ShallowAE:
            channel: channel to plot (there are nb_input_channels*nb_atoms atoms)
         """
         if (channel_to_plot < self.nb_output_channels):
-            atoms = self.atom_images_encoder()[:,:,channel_to_plot, :]
+            atoms = self.atom_images_encoder(normalize=normalize)[:,:,channel_to_plot, :]
         else:
             print('Too big channel number...plotting channel 0 instead...')
             channel_to_plot=0
@@ -176,7 +214,7 @@ class ShallowAE:
             ax.get_yaxis().set_visible(False)
         plt.show()
 
-    def plot_atoms_decoder(self, channel_to_plot=0, nb_to_plot=-1, add_bias=True):
+    def plot_atoms_decoder(self, channel_to_plot=0, nb_to_plot=-1, add_bias=True, normalize=True):
         """
         Plot the weights of the decoder.
         Arguments:
@@ -185,13 +223,13 @@ class ShallowAE:
            add_bias: bool, whether to add the bias (784,) to the weights.
         """
         if (channel_to_plot < self.nb_output_channels):
-            atoms = self.atom_images_decoder(add_bias=add_bias)[:,:,channel_to_plot, :]
+            atoms = self.atom_images_decoder(add_bias=add_bias, normalize=normalize)[:,:,channel_to_plot, :]
         else:
             print('Too big channel number...plotting channel 0 instead...')
             channel_to_plot=0
             atoms = self.atom_images_decoder(add_bias=add_bias)[:,:,0, :]
         if (nb_to_plot<0):
-            n_atoms = atoms.shape[3]
+            n_atoms = atoms.shape[2]
         else:
             n_atoms=nb_to_plot
         n_columns = min(10, n_atoms)
@@ -223,6 +261,41 @@ class ShallowAE:
         svm.fit(H_train, Y_train)
         return svm.score(H_test, Y_test)
 
+    def apply_operator_to_decoder_atoms(self, operator, **kwargs):
+        W = self.atom_images_decoder(add_bias=False, normalize=False)
+        W_op = np.copy(W)
+        nb_rows, nb_columns, nb_channels, nb_atoms = W.shape
+        for i in range(nb_channels):
+            for j in range(nb_atoms):
+                W_op[:,:,i,j]=operator(W[:,:,i,j], **kwargs)
+        AE = ShallowAE(latent_dim=self.latent_dim, nb_input_channels=self.nb_input_channels)
+        W = self.encoder.get_weights()
+        AE.encoder.set_weights([np.copy(W[0]), np.copy(W[1])])
+        W_op = np.reshape(W_op, (nb_rows*nb_columns*nb_channels, nb_atoms))
+        W_op = np.transpose(W_op)
+        AE.decoder.set_weights([W_op, np.copy(self.decoder.get_weights()[1])])
+        return AE
+        
+    def commutation_error(self, X, operator, **kwargs):
+        """
+        Computes the mse between the application of the operator to the images of X_rec (n_samples, n_rows, n_columns), 
+        the application of the operator to the reconstructions of the images of X_rec by the autoencoder, and the decoding after 
+        applying the operator to the atoms of the decoder.
+        Arguments:
+            X: Numpy array of shape (n_samples, n_rows, n_columns, nb_channels), the first channel must be the original image
+            operator: A callable function, that takes an image as input.
+            **kwargs: Other arguments of the operator.
+        """ 
+        nb_samples, nb_rows, nb_columns, nb_channels = X.shape 
+        def apply_operator_to_all_images(X):
+            return np.array([operator(X[i], **kwargs) for i in range(X.shape[0])]).reshape((nb_sample, nb_rows, nb_columns, 1))
+        AE_op = self.apply_operator_to_decoder_atoms(operator, **kwargs)
+        X_rec = self.reconstruction(X)
+        X_op = apply_operator_to_all_images(X[:,:,:,0])
+        X_rec_op = apply_operator_to_all_images(X_rec[:,:,:,0])
+        error_To_Original = AE_op.reconstruction_error(X, X_op)
+        error_To_Reconstruction = AE_op.reconstruction_error(X, X_rec_op)
+        return error_To_Original, error_To_Reconstruction
 
 
 
