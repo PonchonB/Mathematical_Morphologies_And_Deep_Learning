@@ -67,7 +67,7 @@ def plot_embedding(X, title=None):
         plt.title(title)
 
 
-# The following function are deprecated, equivalents exist in the ShallowAE class
+#### The following function are deprecated, equivalents exist in the ShallowAE class
  
 def load_AE(path, custom_objects={}):
     """

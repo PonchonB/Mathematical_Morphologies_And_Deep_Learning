@@ -63,7 +63,7 @@ class L1(Regularizer):
 
     def get_config(self):
         return {'beta': float(self.beta)}
-
+        
 
 class asymmetric_weight_decay(Regularizer):
     """Asymmetric weight decay for Non_Negativity constraint.

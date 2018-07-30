@@ -5,6 +5,7 @@ from keras.layers import Input, Dense, Flatten, Reshape, LeakyReLU, BatchNormali
 from keras import losses, regularizers, metrics
 import keras.utils 
 import h5py
+import math
 from sklearn.model_selection import GridSearchCV, StratifiedShuffleSplit, train_test_split
 from sklearn import svm
 import datetime
@@ -12,8 +13,24 @@ import matplotlib.pyplot as plt
 from sklearn.svm import SVC
 
 class ShallowAE:
+    """
+    General class for shallow encoders (one layer encoder and one layer decoder).
+    Attributes: 
+        latent_dim: int, size of the latent code
+        nb_rows: int, expected number of rows of the input images
+        nb_columns:int, expected number of columns of the input images
+        nb_input_channels: int, expected number of channels of the input images
+        nb_output_channels: int, number of channels in the output of the autoencoder. 
+                            It can only take two values: either one (if one_channel_output=True), or nb_input_channels (else)
+        encoder: Model from keras.model
+        decoder: Model from keras.model
+        autoencoder: Model from keras.model, composed of two layers, the two previous attributes
+    """
 
     def __init__(self, latent_dim=100, nb_rows=28, nb_columns=28, nb_input_channels=1, one_channel_output=True):
+        """
+        Create and initialize an autoencoder.
+        """
         self.latent_dim = latent_dim
         self.nb_input_channels=nb_input_channels
         self.nb_rows=nb_rows
@@ -34,12 +51,13 @@ class ShallowAE:
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
         self.autoencoder = Model(input_img, decoded)
-        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
+        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
         
     @classmethod
     def load(cls, model_name, custom_objects={}, path_to_model_directory="../ShallowAE/"):
         """
-        Load a autoencoder previously saved as a h5 file.
+        Load a autoencoder previously saved with the save method, or a model saved as a h5 file.
+        The file is looked for in the directory path_to_model_directory/Simple/Models/.
         Custom_objects is a dictionary resolving the names of all the custom objects used during the creation of the model. 
         Returns the autoencoder, the encoder and the decoders models, assuming the two latters are respectively the second and the third layer of the AE model.
         """
@@ -57,6 +75,18 @@ class ShallowAE:
         return loaded_AE
         
     def train(self, X_train, X_train_expected_output=None, nb_epochs=100, X_val=None, verbose=1):
+        """
+        Train the autoencoder.
+        Arguments:
+            X_train: numpy array (nb_samples, nb_rows, nb_columns, nb_inputs_channels) the training input.
+            X_train_expected_output: numpy array (nb_samples, nb_rows, nb_columns, nb_output_channels) the training output.
+                                    If None, X_train is used instead. Either all channels (if nb_input_channels=nb_output_channels) or the first channel of X_train. 
+            nb_epochs: int
+            X_val: None, (X_val, Y_val) or numpy array (nb_samples, nb_rows, nb_columns, nb_input_channels) validation data, if specified, not taken account for the training, but the loss is returned at each epoch if verbose >0.
+                    If only one array is specified then it is used for bothe validation input and the validation output. 
+                    All channels are used for the validation output if nb_input_channels=nb_output_channels, otherwise the first channel of the validation input is used as output.
+            verbose: 0, 1 or 2. 0: no prints. 1: progress bar. 2: only one line per epoch.                 
+        """
         if X_val is None:
             validation_data = None
         elif type(X_val) is tuple:
@@ -78,7 +108,8 @@ class ShallowAE:
                 epochs=nb_epochs,
                 batch_size=128,
                 shuffle=True,
-                validation_data=validation_data)
+                validation_data=validation_data, 
+                verbose=verbose)
         
     def get_encoder(self):
         return self.encoder
@@ -98,49 +129,73 @@ class ShallowAE:
     def reconstruction(self, X_test):
         return self.autoencoder.predict(X_test)
     
-    def save(self, path_to_model_directory="../ShallowAE/"):
+    def save(self, path_to_model_directory="../ShallowAE/", model_name=None):
+        """
+        Save the model as a h5 file under the following path: path_to_model_directory/Simmple/Models/yy_mm_dd_dim'latent_dim'.h5
+        model_name: String or None, if specified, it is used as a suffix to the previous name.
+        """
         d = datetime.date.today()
         path_to_directory = path_to_model_directory + "Simple/Models/"
         strDate = d.strftime("%y_%m_%d")
-        model_path = path_to_directory + strDate + "_dim" + str(self.latent_dim) + ".h5"
+        if model_name is None:
+            model_path = path_to_directory + strDate + "_dim" + str(self.latent_dim) + ".h5"
+        else:
+            model_path = path_to_directory + strDate + "_dim" + str(self.latent_dim) + model_name + ".h5"
         self.autoencoder.save(model_path)
         
-    def reconstruction_error(self, X_test, X_rec_th=None):
-        if X_rec_th is None:
-            X_rec = X_test
-        else:
-            X_rec = X_rec_th
-        return self.autoencoder.evaluate(X_test, X_rec, verbose=0, batch_size=128)[1]
-        
     def loss(self, X_test, X_rec_th=None):
+        """
+        Returns a tuple with both the total loss and the mse between the reconstruction and the exected output.
+        X_test: numpy array (nb_samples, nb_rows, nb_columns, nb_input_channels). Input of the autoencoder.
+        X_rec_th: None or numpy array (nb_samples, nb_rows, nb_columns, nb_output_channels).
+                    Expected reconstruction by the autoencoder. 
+                    If None, X_test is used in place: all channels if nb_input_channels=nb_output_channels, first channel else. 
+        """
         if X_rec_th is None:
-            X_rec = X_test
+            if (self.nb_output_channels==self.nb_input_channels):
+                X_rec = X_test
+            else:
+                X_rec = X_test[:,:,:,0].reshape((X_test.shape[0], self.nb_rows, self.nb_columns, 1)) 
         else:
             X_rec = X_rec_th
         return self.autoencoder.evaluate(X_test, X_rec, verbose=0, batch_size=128)
 
+
+    def reconstruction_error(self, X_test, X_rec_th=None):
+        """
+        Returns the mse between the reconstruction and the exected output.
+        X_test: numpy array (nb_samples, nb_rows, nb_columns, nb_input_channels). Input of the autoencoder.
+        X_rec_th: None or numpy array (nb_samples, nb_rows, nb_columns, nb_output_channels).
+                    Expected reconstruction by the autoencoder. 
+                    If None, X_test is used in place: all channels if nb_input_channels=nb_output_channels, first channel else. 
+        """
+        return self.loss(X_test, X_rec_th=X_rec_th)[1]
+        
     def total_loss(self, X_test, X_rec_th=None):
-        if X_rec_th is None:
-            if (self.nb_output_channels==1):
-                X_rec = X_test[:,:,:,0].reshape(self.)
-        else:
-            X_rec = X_rec_th
-        return self.autoencoder.evaluate(X_test, X_rec, verbose=0, batch_size=128)[0]
+        """
+        Returns the total loss (mse + additional costs (constraints and regularizers)) between the reconstruction and the exected output.
+        X_test: numpy array (nb_samples, nb_rows, nb_columns, nb_input_channels). Input of the autoencoder.
+        X_rec_th: None or numpy array (nb_samples, nb_rows, nb_columns, nb_output_channels).
+                    Expected reconstruction by the autoencoder. 
+                    If None, X_test is used in place: all channels if nb_input_channels=nb_output_channels, first channel else. 
+        """
+        return self.loss(X_test, X_rec_th=X_rec_th)[0]
         
     def plot_reconstructions(self, X_test, channel_to_plot=0):
         """
-        Plots the original images, as well as their reconstructions by the given autoencoder.
+        Plots the original images, as well as their reconstructions by the autoencoder.
 
         Arguments:
-            AE: an autoencoder.
-            X: a numpy array of shape (10, 28, 28, nb_channels)
+            X_test: a numpy array of shape (nb_samples, nb_rows, nb_columns, nb_input_channels)
+                    Only the 10 first samples will be plotted.
+            channel_to_plot: int, the output_channel that will be plotted.
         """
         if (channel_to_plot < self.nb_output_channels):
             X_rec = self.reconstruction(X_test)[:,:,:,channel_to_plot]
         else:
             print('Too big channel number...plotting channel 0 instead...')
             channel_to_plot=0
-            X_rec = self.reconstruction(X_test)[:,:,:,0]
+            X_rec = self.reconstruction(X_test)[:10,:,:,0]
         plt.figure(figsize=(20, 4))
         for i in range(10):
             # display original
@@ -160,40 +215,49 @@ class ShallowAE:
         
     def atom_images_encoder(self, normalize=True):
         """
-        Return the atom images of the encoder : normalized weights. 
-        Corresponds to the artificial input images that maximize each of the code coefficients.
+        Return the weigths of the encoder as latent_dim * nb_input_channels atom images.
+        The result is of shape (nb_rows, nb_columns, nb_channels, nb_atoms)
+        Arguments:
+            normalize: bool. If True each image is normalized, giving the artificial input images that maximize each of the code coefficients (with unity energy). 
         """
         W= self.encoder.get_weights()[0]
         nbAtoms = W.shape[1]
-        W = np.reshape(W, (28*28, self.nb_input_channels, nbAtoms))
+        W = np.reshape(W, (self.nb_rows*self.nb_columns, self.nb_input_channels, nbAtoms))
         if normalize:
             W = keras.utils.normalize(W, axis=0, order=2)
-        atoms = W.reshape((28,28, self.nb_input_channels, nbAtoms))
+        atoms = W.reshape((self.nb_rows,self.nb_columns, self.nb_input_channels, nbAtoms))
         return atoms
 
     def atom_images_decoder(self, add_bias=True, normalize=True):
         """
-        Return the atom images of the encoder : normalized weights.
+        Returns the weights of the decoder as latent_dim * nb_output_channels atom images.
+        The result is of shape (nb_rows, nb_columns, nb_channels, nb_atoms)
+        Arguments:
+            Arguments:
+            normalize: bool. If True each image is normalized, giving the artificial input images that maximize each of the code coefficients (with unity energy). 
+            add_bias: bool. If True, adds the bias to each images. The results then correspond to the input of the activation layer when all code coefficients are equal to one.
+
         """
         W= self.decoder.get_weights()[0]
         if add_bias:
             W = W + self.decoder.get_weights()[1] 
         W = np.transpose(W)
         nbAtoms = W.shape[1]
-        W = np.reshape(W, (28*28, self.nb_output_channels, nbAtoms))
+        W = np.reshape(W, (self.nb_rows*self.nb_columns, self.nb_output_channels, nbAtoms))
         if normalize:
             W = keras.utils.normalize(W, axis=0, order=2)
-        atoms = W.reshape((28,28, self.nb_output_channels, nbAtoms))
+        atoms = W.reshape((self.nb_rows, self.nb_columns, self.nb_output_channels, nbAtoms))
         return atoms
     
     def plot_atoms_encoder(self, channel_to_plot=0, nb_to_plot=-1, normalize=True):
         """
         Plot the weights of the encoder.
         Arguments:
+           normalize: bool. If True each image is normalized, giving the artificial input images that maximize each of the code coefficients (with unity energy). 
            nb_to_plot: number of basis images to plot, -1 is all, otherwise plot the nb_to_plot first ones.
            channel: channel to plot (there are nb_input_channels*nb_atoms atoms)
         """
-        if (channel_to_plot < self.nb_output_channels):
+        if (channel_to_plot < self.nb_input_channels):
             atoms = self.atom_images_encoder(normalize=normalize)[:,:,channel_to_plot, :]
         else:
             print('Too big channel number...plotting channel 0 instead...')
@@ -218,9 +282,10 @@ class ShallowAE:
         """
         Plot the weights of the decoder.
         Arguments:
-           nb_to_plot: number of basis images to plot, -1 is all, otherwise plot the nb_to_plot first ones.
-           channel: channel to plot (there are nb_input_channels*nb_atoms atoms)
-           add_bias: bool, whether to add the bias (784,) to the weights.
+            nb_to_plot: number of basis images to plot, -1 is all, otherwise plot the nb_to_plot first ones.
+            channel: channel to plot (there are nb_input_channels*nb_atoms atoms)
+            add_bias: bool, whether to add the bias (784,) to the weights.
+            normalize: bool. If True each image is normalized, giving the artificial input images that maximize each of the code coefficients (with unity energy). 
         """
         if (channel_to_plot < self.nb_output_channels):
             atoms = self.atom_images_decoder(add_bias=add_bias, normalize=normalize)[:,:,channel_to_plot, :]
@@ -244,6 +309,23 @@ class ShallowAE:
         plt.show()
         
     def best_SVM_classification_score(self, X, y, min_log_C=-2, max_log_C=3, nb_values_C=7, min_log_gamma=-3, max_log_gamma=2, nb_values_gamma=7):
+        """
+        Performs cross-validation and parameter seletion (grid search on the specified parameter) 
+            and returns the best classification score using a SVM classifier with a gaussian kernel (rbf).
+        Returns also the best parameters on the grid search, as a dictionary.
+        Arguments:
+            X: numpy array (nb_samples, nb_rows, nb_columns, nb_input_channels) to be encoded on whose code will be use for the classification
+            y: numpy array (nb_sampls,). Labels of each image for the classification.
+            min_log_C: int. Minimal value of the C parameter of the SVM classifier (margin) to be tested in log_10 scale.
+            max_log_C: int.  Maximal value of the C parameter of the SVM classifier (margin) to be tested in log_10 scale.
+            nb_values_C: int. Number of values of the C parameter of the SVM classifier (margin) to be tested in log_10 scale.
+            min_log_gamma: int. Minimal value of the gamma parameter of the SVM classifier (free parameter) to be tested in log_10 scale.
+            max_log_gamma: int.  Maximal value of the C parameter of the SVM classifier (free paramter) to be tested in log_10 scale.
+            nb_values_gamma: int. Number of values of the C parameter of the SVM classifier (free paramter) to be tested in log_10 scale.
+        Note that the larger gamma is, the smaller the distance between two points must be for the kernel value to be close to 1.
+        A value larger than 100 (max_log_C=2) usually leads to poor classification performance.
+        On the opposite the smaller gamma, the more points are considered in the 'neighborhood' of each specific point.
+        """
         H = self.encode(X)
         H_train, H_test, Y_train, Y_test = train_test_split(H, y, test_size=0.1)
         C_range = np.logspace(min_log_C, max_log_C, nb_values_C)
@@ -252,9 +334,13 @@ class ShallowAE:
         cv = StratifiedShuffleSplit(n_splits=3, test_size=0.2, random_state=42)
         grid = GridSearchCV(svm.SVC(cache_size=600), param_grid=param_grid, cv=cv, verbose=2)
         grid.fit(H_train, Y_train)
-        return grid.score(H_test, Y_test)
+        return grid.score(H_test, Y_test), grid.best_params_
 
     def svm_classifiation_score(self, X, y, C=1.0, kernel='rbf', gamma='auto', degree=3):
+        """
+        Returns the classifiation score on the learnt encoding using a SVM with specified parameters.
+        The data X and the labels y are splitted into training and tesing sets.
+        """
         H =self.encode(X)
         H_train, H_test, Y_train, Y_test = train_test_split(H, y, test_size=0.1)
         svm = SVC(C=C, kernel=kernel, gamma=gamma, degree=degree, cache_size=600)
@@ -262,13 +348,18 @@ class ShallowAE:
         return svm.score(H_test, Y_test)
 
     def apply_operator_to_decoder_atoms(self, operator, **kwargs):
+        """
+        Returns a new instance of ShallowAE where the the operator (with the arguments specified in **kwargs) had been applied to the atom images of the decoder.
+        Regularizers are not included in the new model.
+        """
         W = self.atom_images_decoder(add_bias=False, normalize=False)
         W_op = np.copy(W)
         nb_rows, nb_columns, nb_channels, nb_atoms = W.shape
         for i in range(nb_channels):
             for j in range(nb_atoms):
                 W_op[:,:,i,j]=operator(W[:,:,i,j], **kwargs)
-        AE = ShallowAE(latent_dim=self.latent_dim, nb_input_channels=self.nb_input_channels)
+        AE = ShallowAE(latent_dim=self.latent_dim, nb_rows=self.nb_rows, nb_columns=self.nb_columns,  
+                        nb_input_channels=self.nb_input_channels, one_channel_output=(self.nb_output_channels==1))
         W = self.encoder.get_weights()
         AE.encoder.set_weights([np.copy(W[0]), np.copy(W[1])])
         W_op = np.reshape(W_op, (nb_rows*nb_columns*nb_channels, nb_atoms))
@@ -276,7 +367,7 @@ class ShallowAE:
         AE.decoder.set_weights([W_op, np.copy(self.decoder.get_weights()[1])])
         return AE
         
-    def commutation_error(self, X, operator, **kwargs):
+    def max_approximation_error(self, X, operator, **kwargs):
         """
         Computes the mse between the application of the operator to the images of X_rec (n_samples, n_rows, n_columns), 
         the application of the operator to the reconstructions of the images of X_rec by the autoencoder, and the decoding after 
@@ -286,17 +377,32 @@ class ShallowAE:
             operator: A callable function, that takes an image as input.
             **kwargs: Other arguments of the operator.
         """ 
-        nb_samples, nb_rows, nb_columns, nb_channels = X.shape 
+        nb_samples = X.shape[0]
         def apply_operator_to_all_images(X):
-            return np.array([operator(X[i], **kwargs) for i in range(X.shape[0])]).reshape((nb_sample, nb_rows, nb_columns, 1))
+            result = np.zeros((nb_samples, self.nb_rows, self.nb_columns, self.nb_output_channels))
+            for i in range(nb_samples):
+                for j in range(self.nb_output_channels):
+                    result[i,:,:,j]= operator(X[i, :,:,j], **kwargs)
+            return result
         AE_op = self.apply_operator_to_decoder_atoms(operator, **kwargs)
         X_rec = self.reconstruction(X)
-        X_op = apply_operator_to_all_images(X[:,:,:,0])
+        X_op = apply_operator_to_all_images(X)
         X_rec_op = apply_operator_to_all_images(X_rec[:,:,:,0])
         error_To_Original = AE_op.reconstruction_error(X, X_op)
         error_To_Reconstruction = AE_op.reconstruction_error(X, X_rec_op)
         return error_To_Original, error_To_Reconstruction
 
+    def sparsity_measure(X):
+        """
+        Returns the sparsity measure defined by Hoyer 2004 applied to the encoding of X by the encoder.
+        This measure can be used to compare the sparsity of the various encodings.
+        Arguments:
+            X: numpy array (nb_samples, nb_rows, nb_columns, nb_input_channels)
+        """
+        H = self.encode(X)
+        sqrt = math.sqrt(self.latent_dim)
+        sigma = (sqrt - (np.linalg.norm(H, ord=1, axis=1)/np.linalg.norm(H, ord=2, axis=1)+0.0000001))/(sqrt - 1)
+        return np.mean(sigma)
 
 
 
