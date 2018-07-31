@@ -34,6 +34,15 @@ def ClosebyRec(input_im,SE=2):
     #return c-out_im
     return out_im
 
+def dilatation(input_im, SE_scale=2):
+    """
+    Dilatation by a disk of scale SE_scale.
+    Argument:
+        input_im: numpy array (nb_rows, nb_images)
+    """
+    return skm.dilation(input_im,skm.disk(SE_scale))
+
+
 def AdditiveDecomposition(input_im,levels=4,step=1, init_step=2):
     """Additive Decomposition by Reconstruction
        Version from AMD paper.

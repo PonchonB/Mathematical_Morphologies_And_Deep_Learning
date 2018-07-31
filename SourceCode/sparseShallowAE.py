@@ -42,7 +42,7 @@ class SparseShallowAE_KL(ShallowAE):
             self.nb_output_channels=nb_input_channels
         self.sparsity_weight = sparsity_weight
         self.sparsity_objective = sparsity_objective
-        input_img = Input(shape=(self.nb_rows, self.nb_columns, nb_input_channels))  # adapt this if using `channels_first` image data format
+        input_img = Input(shape=(self.nb_rows, self.nb_columns, self.nb_input_channels))  # adapt this if using `channels_first` image data format
         x = Flatten()(input_img)
         encoded = Dense(latent_dim, activation='sigmoid', 
                         activity_regularizer=custom_regularizers.KL_divergence(beta=self.sparsity_weight, 

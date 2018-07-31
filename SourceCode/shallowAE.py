@@ -140,10 +140,10 @@ class ShallowAE:
         if model_name is None:
             model_path = path_to_directory + strDate + "_dim" + str(self.latent_dim) + ".h5"
         else:
-            model_path = path_to_directory + strDate + "_dim" + str(self.latent_dim) + model_name + ".h5"
+            model_path = path_to_directory + strDate + "_dim" + str(self.latent_dim) + "_" + model_name + ".h5"
         self.autoencoder.save(model_path)
         
-    def loss(self, X_test, X_rec_th=None):
+    def loss_and_mse(self, X_test, X_rec_th=None):
         """
         Returns a tuple with both the total loss and the mse between the reconstruction and the exected output.
         X_test: numpy array (nb_samples, nb_rows, nb_columns, nb_input_channels). Input of the autoencoder.
@@ -169,7 +169,12 @@ class ShallowAE:
                     Expected reconstruction by the autoencoder. 
                     If None, X_test is used in place: all channels if nb_input_channels=nb_output_channels, first channel else. 
         """
-        return self.loss(X_test, X_rec_th=X_rec_th)[1]
+        loss_and_mse = self.loss_and_mse(X_test, X_rec_th=X_rec_th) 
+        try:
+            mse=loss_and_mse[1]
+        except IndexError:
+            mse=loss_and_mse
+        return mse
         
     def total_loss(self, X_test, X_rec_th=None):
         """
@@ -179,8 +184,13 @@ class ShallowAE:
                     Expected reconstruction by the autoencoder. 
                     If None, X_test is used in place: all channels if nb_input_channels=nb_output_channels, first channel else. 
         """
-        return self.loss(X_test, X_rec_th=X_rec_th)[0]
-        
+        loss_and_mse = self.loss_and_mse(X_test, X_rec_th=X_rec_th) 
+        try:
+            total_loss=loss_and_mse[0]
+        except IndexError:
+            total_loss=loss_and_mse
+        return total_loss
+
     def plot_reconstructions(self, X_test, channel_to_plot=0):
         """
         Plots the original images, as well as their reconstructions by the autoencoder.
@@ -228,7 +238,7 @@ class ShallowAE:
         atoms = W.reshape((self.nb_rows,self.nb_columns, self.nb_input_channels, nbAtoms))
         return atoms
 
-    def atom_images_decoder(self, add_bias=True, normalize=True):
+    def atom_images_decoder(self, add_bias=False, normalize=False):
         """
         Returns the weights of the decoder as latent_dim * nb_output_channels atom images.
         The result is of shape (nb_rows, nb_columns, nb_channels, nb_atoms)
@@ -278,7 +288,7 @@ class ShallowAE:
             ax.get_yaxis().set_visible(False)
         plt.show()
 
-    def plot_atoms_decoder(self, channel_to_plot=0, nb_to_plot=-1, add_bias=True, normalize=True):
+    def plot_atoms_decoder(self, channel_to_plot=0, nb_to_plot=-1, add_bias=False, normalize=False):
         """
         Plot the weights of the decoder.
         Arguments:
@@ -347,15 +357,22 @@ class ShallowAE:
         svm.fit(H_train, Y_train)
         return svm.score(H_test, Y_test)
 
-    def apply_operator_to_decoder_atoms(self, operator, **kwargs):
+    def apply_operator_to_decoder_atoms(self, operator, apply_to_bias=False, **kwargs):
         """
         Returns a new instance of ShallowAE where the the operator (with the arguments specified in **kwargs) had been applied to the atom images of the decoder.
         Regularizers are not included in the new model.
         """
         W = self.atom_images_decoder(add_bias=False, normalize=False)
+        b = self.decoder.get_weights()[1]
         W_op = np.copy(W)
+        if apply_to_bias:
+            b_op = b.reshape((self.nb_rows, self.nb_columns, self.nb_output_channels))
+        else:
+            b_op= np.copy(b)
         nb_rows, nb_columns, nb_channels, nb_atoms = W.shape
         for i in range(nb_channels):
+            if apply_to_bias:
+                b_op[:,:,i] = operator(b_op[:,:,i], **kwargs)
             for j in range(nb_atoms):
                 W_op[:,:,i,j]=operator(W[:,:,i,j], **kwargs)
         AE = ShallowAE(latent_dim=self.latent_dim, nb_rows=self.nb_rows, nb_columns=self.nb_columns,  
@@ -364,10 +381,12 @@ class ShallowAE:
         AE.encoder.set_weights([np.copy(W[0]), np.copy(W[1])])
         W_op = np.reshape(W_op, (nb_rows*nb_columns*nb_channels, nb_atoms))
         W_op = np.transpose(W_op)
-        AE.decoder.set_weights([W_op, np.copy(self.decoder.get_weights()[1])])
+        if apply_to_bias:
+            b_op=b_op.flatten()
+        AE.decoder.set_weights([W_op, b_op])
         return AE
         
-    def max_approximation_error(self, X, operator, **kwargs):
+    def max_approximation_error(self, X, operator, apply_to_bias=False, **kwargs):
         """
         Computes the mse between the application of the operator to the images of X_rec (n_samples, n_rows, n_columns), 
         the application of the operator to the reconstructions of the images of X_rec by the autoencoder, and the decoding after 
@@ -384,15 +403,15 @@ class ShallowAE:
                 for j in range(self.nb_output_channels):
                     result[i,:,:,j]= operator(X[i, :,:,j], **kwargs)
             return result
-        AE_op = self.apply_operator_to_decoder_atoms(operator, **kwargs)
+        AE_op = self.apply_operator_to_decoder_atoms(operator, apply_to_bias=apply_to_bias, **kwargs)
         X_rec = self.reconstruction(X)
         X_op = apply_operator_to_all_images(X)
-        X_rec_op = apply_operator_to_all_images(X_rec[:,:,:,0])
-        error_To_Original = AE_op.reconstruction_error(X, X_op)
-        error_To_Reconstruction = AE_op.reconstruction_error(X, X_rec_op)
+        X_rec_op = apply_operator_to_all_images(X_rec)
+        error_To_Original = AE_op.reconstruction_error(X, X_rec_th=X_op)
+        error_To_Reconstruction = AE_op.reconstruction_error(X, X_rec_th=X_rec_op)
         return error_To_Original, error_To_Reconstruction
 
-    def sparsity_measure(X):
+    def sparsity_measure(self, X):
         """
         Returns the sparsity measure defined by Hoyer 2004 applied to the encoding of X by the encoder.
         This measure can be used to compare the sparsity of the various encodings.
