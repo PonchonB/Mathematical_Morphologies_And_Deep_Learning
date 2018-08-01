@@ -58,13 +58,13 @@ class Sparse_NonNeg_ShallowAE_KL_AsymDecay(ShallowAE):
         x = Flatten()(input_img)
         encoded = Dense(latent_dim, activation='sigmoid', 
                         activity_regularizer=custom_regularizers.KL_divergence(beta=self.sparsity_weight, 
-                                                                                rho=self.sparsity_objective), 
-                        kernel_regularizer=custom_regularizers.asymmetric_weight_decay(alpha=self.decay_positive_weights, 
-                                                                                        beta=self.decay_negative_weights, 
-                                                                                        lam=self.decay_weight))(x)
+                                                                                rho=self.sparsity_objective))(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
-        x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels)(encoded_img)
+        x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels, 
+                        kernel_regularizer=custom_regularizers.asymmetric_weight_decay(alpha=self.decay_positive_weights, 
+                                                                                        beta=self.decay_negative_weights, 
+                                                                                        lam=self.decay_weight))(encoded_img)
         x = LeakyReLU(alpha=0.1)(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
@@ -156,11 +156,11 @@ class Sparse_NonNeg_ShallowAE_KL_NonNegConstraint(ShallowAE):
         x = Flatten()(input_img)
         encoded = Dense(latent_dim, activation='sigmoid', 
                             activity_regularizer=custom_regularizers.KL_divergence(beta=self.sparsity_weight,  
-                                                                                    rho=self.sparsity_objective), 
-                            kernel_constraint=constraints.non_neg())(x)
+                                                                                    rho=self.sparsity_objective))(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
-        x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels)(encoded_img)
+        x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels, 
+                            kernel_constraint=constraints.non_neg())(encoded_img)
         x = LeakyReLU(alpha=0.1)(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
@@ -255,13 +255,13 @@ class Sparse_NonNeg_ShallowAE_L1_AsymDecay(ShallowAE):
         input_img = Input(shape=(self.nb_rows, self.nb_columns, nb_input_channels))  # adapt this if using `channels_first` image data format
         x = Flatten()(input_img)
         encoded = Dense(latent_dim, activation='sigmoid', 
-                            activity_regularizer=regularizers.l1(self.sparsity_weight), 
-                            kernel_regularizer=custom_regularizers.asymmetric_weight_decay(alpha=self.decay_positive_weights, 
-                                                                                            beta=self.decay_negative_weights, 
-                                                                                            lam=self.decay_weight))(x)
+                            activity_regularizer=regularizers.l1(self.sparsity_weight))(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
-        x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels)(encoded_img)
+        x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels, 
+                            kernel_regularizer=custom_regularizers.asymmetric_weight_decay(alpha=self.decay_positive_weights, 
+                                                                                            beta=self.decay_negative_weights, 
+                                                                                            lam=self.decay_weight))(encoded_img)
         x = LeakyReLU(alpha=0.1)(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
@@ -348,11 +348,11 @@ class Sparse_NonNeg_ShallowAE_L1_NonNegConstraint(ShallowAE):
         input_img = Input(shape=(self.nb_rows, self.nb_columns, nb_input_channels))  # adapt this if using `channels_first` image data format
         x = Flatten()(input_img)
         encoded = Dense(latent_dim, activation='sigmoid', 
-                        activity_regularizer=regularizers.l1(self.sparsity_weight), 
-                        kernel_constraint=constraints.non_neg())(x)
+                        activity_regularizer=regularizers.l1(self.sparsity_weight))(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
-        x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels)(encoded_img)
+        x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels, 
+                        kernel_constraint=constraints.non_neg())(encoded_img)
         x = LeakyReLU(alpha=0.1)(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
@@ -450,13 +450,13 @@ class Sparse_NonNeg_ShallowAE_KLsum_AsymDecay(ShallowAE):
         x = Flatten()(input_img)
         encoded = Dense(latent_dim, activation='sigmoid', 
                             activity_regularizer=custom_regularizers.KL_divergence_sum(beta=self.sparsity_weight, 
-                                                                                        rho=self.sparsity_objective), 
-                            kernel_regularizer=custom_regularizers.asymmetric_weight_decay(alpha=self.decay_positive_weights, 
-                                                                                            beta=self.decay_negative_weights, 
-                                                                                            lam=self.decay_weight))(x)
+                                                                                        rho=self.sparsity_objective))(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
-        x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels)(encoded_img)
+        x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels, 
+                            kernel_regularizer=custom_regularizers.asymmetric_weight_decay(alpha=self.decay_positive_weights, 
+                                                                                            beta=self.decay_negative_weights, 
+                                                                                            lam=self.decay_weight))(encoded_img)
         x = LeakyReLU(alpha=0.1)(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
@@ -549,11 +549,11 @@ class Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint(ShallowAE):
         x = Flatten()(input_img)
         encoded = Dense(latent_dim, activation='sigmoid', 
                             activity_regularizer=custom_regularizers.KL_divergence_sum(beta=self.sparsity_weight, 
-                                                                                        rho=self.sparsity_objective), 
-                            kernel_constraint=constraints.non_neg())(x)
+                                                                                        rho=self.sparsity_objective))(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
-        x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels)(encoded_img)
+        x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels, 
+                            kernel_constraint=constraints.non_neg())(encoded_img)
         x = LeakyReLU(alpha=0.1)(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')

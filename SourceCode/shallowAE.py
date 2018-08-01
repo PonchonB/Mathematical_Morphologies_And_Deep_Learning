@@ -241,7 +241,7 @@ class ShallowAE:
     def atom_images_decoder(self, add_bias=False, normalize=False):
         """
         Returns the weights of the decoder as latent_dim * nb_output_channels atom images.
-        The result is of shape (nb_rows, nb_columns, nb_channels, nb_atoms)
+        The result is of shape (nb_atoms, nb_rows, nb_columns, nb_channels)
         Arguments:
             Arguments:
             normalize: bool. If True each image is normalized, giving the artificial input images that maximize each of the code coefficients (with unity energy). 
@@ -251,12 +251,10 @@ class ShallowAE:
         W= self.decoder.get_weights()[0]
         if add_bias:
             W = W + self.decoder.get_weights()[1] 
-        W = np.transpose(W)
-        nbAtoms = W.shape[1]
-        W = np.reshape(W, (self.nb_rows*self.nb_columns, self.nb_output_channels, nbAtoms))
+        W = np.reshape(W, (self.latent_dim, self.nb_rows*self.nb_columns, self.nb_output_channels))
         if normalize:
-            W = keras.utils.normalize(W, axis=0, order=2)
-        atoms = W.reshape((self.nb_rows, self.nb_columns, self.nb_output_channels, nbAtoms))
+            W = keras.utils.normalize(W, axis=1, order=2)
+        atoms = W.reshape((self.latent_dim, self.nb_rows, self.nb_columns, self.nb_output_channels))
         return atoms
     
     def plot_atoms_encoder(self, channel_to_plot=0, nb_to_plot=-1, normalize=True):
@@ -298,13 +296,13 @@ class ShallowAE:
             normalize: bool. If True each image is normalized, giving the artificial input images that maximize each of the code coefficients (with unity energy). 
         """
         if (channel_to_plot < self.nb_output_channels):
-            atoms = self.atom_images_decoder(add_bias=add_bias, normalize=normalize)[:,:,channel_to_plot, :]
+            atoms = self.atom_images_decoder(add_bias=add_bias, normalize=normalize)[:,:,:,channel_to_plot]
         else:
             print('Too big channel number...plotting channel 0 instead...')
             channel_to_plot=0
-            atoms = self.atom_images_decoder(add_bias=add_bias)[:,:,0, :]
+            atoms = self.atom_images_decoder(add_bias=add_bias)[:,:,:,0]
         if (nb_to_plot<0):
-            n_atoms = atoms.shape[2]
+            n_atoms =self.latent_dim
         else:
             n_atoms=nb_to_plot
         n_columns = min(10, n_atoms)
@@ -312,7 +310,7 @@ class ShallowAE:
         plt.figure(figsize=(n_columns*2,n_rows*2))
         for i in range(n_atoms):
             ax = plt.subplot(n_rows, n_columns, i + 1)
-            plt.imshow(atoms[:, :,i])
+            plt.imshow(atoms[i])
             plt.gray()
             ax.get_xaxis().set_visible(False)
             ax.get_yaxis().set_visible(False)
@@ -369,18 +367,16 @@ class ShallowAE:
             b_op = b.reshape((self.nb_rows, self.nb_columns, self.nb_output_channels))
         else:
             b_op= np.copy(b)
-        nb_rows, nb_columns, nb_channels, nb_atoms = W.shape
-        for i in range(nb_channels):
+        for i in range(self.nb_output_channels):
             if apply_to_bias:
                 b_op[:,:,i] = operator(b_op[:,:,i], **kwargs)
-            for j in range(nb_atoms):
-                W_op[:,:,i,j]=operator(W[:,:,i,j], **kwargs)
+            for j in range(self.latent_dim):
+                W_op[j,:,:,i]=operator(W[j,:,:,i], **kwargs)
         AE = ShallowAE(latent_dim=self.latent_dim, nb_rows=self.nb_rows, nb_columns=self.nb_columns,  
                         nb_input_channels=self.nb_input_channels, one_channel_output=(self.nb_output_channels==1))
         W = self.encoder.get_weights()
         AE.encoder.set_weights([np.copy(W[0]), np.copy(W[1])])
-        W_op = np.reshape(W_op, (nb_rows*nb_columns*nb_channels, nb_atoms))
-        W_op = np.transpose(W_op)
+        W_op = np.reshape(W_op, (self.latent_dim, self.nb_rows*self.nb_columns*self.nb_output_channels))
         if apply_to_bias:
             b_op=b_op.flatten()
         AE.decoder.set_weights([W_op, b_op])

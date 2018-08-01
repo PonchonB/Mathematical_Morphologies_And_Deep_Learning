@@ -48,13 +48,12 @@ class NonNegShallowAE_Asymmetric_decay(ShallowAE):
         self.decay_weight = decay_weight
         input_img = Input(shape=(self.nb_rows, self.nb_columns, nb_input_channels))  # adapt this if using `channels_first` image data format
         x = Flatten()(input_img)
-        encoded = Dense(latent_dim, activation='sigmoid',
-                        kernel_regularizer=custom_regularizers.asymmetric_weight_decay(alpha=self.decay_positive_weights, 
-                                                                                       beta=self.decay_negative_weights, 
-                                                                                       lam=self.decay_weight))(x)
+        encoded = Dense(latent_dim, activation='sigmoid')(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
-        x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels)(encoded_img)
+        x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels, kernel_regularizer=custom_regularizers.asymmetric_weight_decay(alpha=self.decay_positive_weights, 
+                                                                                       beta=self.decay_negative_weights, 
+                                                                                       lam=self.decay_weight))(encoded_img)
         x = LeakyReLU(alpha=0.1)(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
@@ -128,10 +127,10 @@ class NonNegShallowAE_NonNegConstraint(ShallowAE):
             self.nb_output_channels=nb_input_channels
         input_img = Input(shape=(self.nb_rows, self.nb_columns, nb_input_channels))  # adapt this if using `channels_first` image data format
         x = Flatten()(input_img)
-        encoded = Dense(latent_dim, activation='sigmoid', kernel_constraint=constraints.non_neg())(x)
+        encoded = Dense(latent_dim, activation='sigmoid')(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
-        x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels)(encoded_img)
+        x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels, kernel_constraint=constraints.non_neg())(encoded_img)
         x = LeakyReLU(alpha=0.1)(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
