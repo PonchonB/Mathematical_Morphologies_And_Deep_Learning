@@ -4,4 +4,4 @@ SourceCode/__pycache__/
 Logs/
 SourceCode/*.pyc
 Notebooks/.ipynb_checkpoints/
-
+ShallowAE/
