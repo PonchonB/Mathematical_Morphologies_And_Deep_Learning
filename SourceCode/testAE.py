@@ -45,8 +45,7 @@ def testDims(ShallowAE_class=ShallowAE, latent_dimensions=[100], nb_epochs=400, 
         SVM_best_gamma_parameter = np.zeros(nb_run)
     for idx, d in enumerate(latent_dimensions):
         shAE = ShallowAE_class(latent_dim=d, nb_input_channels=nb_input_channels, one_channel_output=one_channel_output, **kwargs)
-        shAE.train(x_train, nb_epochs=nb_epochs, X_val=x_test, verbose=2,
-                    callbacks=[keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=10)])
+        shAE.train(x_train, nb_epochs=nb_epochs, X_val=x_test, verbose=2)
         shAE.save(path_to_model_directory=path_to_dir)
         train_rec_errors[idx] =shAE.reconstruction_error(x_train)
         test_rec_errors[idx] = shAE.reconstruction_error(x_test)
