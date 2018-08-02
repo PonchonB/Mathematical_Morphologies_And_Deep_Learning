@@ -67,6 +67,31 @@ def plot_embedding(X, title=None):
         plt.title(title)
 
 
+def apply_operator_to_all_images(operator, X, **kwargs):
+    nb_samples, nb_rows, nb_columns, nb_output_channels =X.shape
+    result = np.zeros((nb_samples, nb_rows, nb_columns, nb_output_channels))
+    for i in range(nb_samples):
+        for j in range(nb_output_channels):
+            result[i,:,:,j]= operator(X[i, :,:,j], **kwargs)
+    return result
+
+def plot_all_images(X, channel_to_plot=0):
+    nb_samples, _, _, nb_channels =X.shape
+    if (channel_to_plot >= nb_channels):
+        print('Too big channel number...plotting channel 0 instead...')
+        channel_to_plot=0
+    n_columns = min(10, nb_samples)
+    n_rows = int(nb_samples/10) +1   
+    plt.figure(figsize=(n_columns*2,n_rows*2))
+    for i in range(nb_samples):
+        ax = plt.subplot(n_rows, n_columns, i + 1)
+        plt.imshow(X[i,:,:,channel_to_plot])
+        plt.gray()
+        ax.get_xaxis().set_visible(False)
+        ax.get_yaxis().set_visible(False)
+    plt.show()
+
+    
 #### The following function are deprecated, equivalents exist in the ShallowAE class
  
 def load_AE(path, custom_objects={}):
