@@ -54,10 +54,10 @@ def test_KL_div(sparsity_weights = [1], sparsity_objectives = [0.1], latent_dime
             np.save(out_path +'_test_kl_loss_' + strDims, test_kl_loss)
             np.save(out_path +'_training_sparsity_' + strDims, sparsity_train)
             np.save(out_path +'_test_sparsity_' + strDims, sparsity_test)
-            np.save(out_path +'_training_max_approx_error_toOriginal_dilatation' + strDims, max_approx_error_toOriginal_train)
-            np.save(out_path +'_test_max_approx_error_toOriginal_dilation' + strDims, max_approx_error_toOriginal_test)
-            np.save(out_path +'_training_max_approx_error_toRec_dilatation' + strDims, max_approx_error_toRec_train)
-            np.save(out_path +'_test_max_approx_error_toRec_dilation' + strDims, max_approx_error_toRec_test)
+            np.save(out_path +'_training_max_approx_error_toOriginal_dilatation_' + strDims, max_approx_error_toOriginal_train)
+            np.save(out_path +'_test_max_approx_error_toOriginal_dilation_' + strDims, max_approx_error_toOriginal_test)
+            np.save(out_path +'_training_max_approx_error_toRec_dilatation_' + strDims, max_approx_error_toRec_train)
+            np.save(out_path +'_test_max_approx_error_toRec_dilation_' + strDims, max_approx_error_toRec_test)
             if svm:
                 SVM_classification_accuracy[idx1, idx2] = shAE.best_SVM_classification_score(x_test, y_test, nb_values_C=10, nb_values_gamma=10)[0]
                 np.save(out_path +'_svm_acc_' + strDims, SVM_classification_accuracy)
