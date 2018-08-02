@@ -92,7 +92,7 @@ class ShallowAE:
             cb = None
         elif type(X_val) is tuple:
             validation_data=X_val
-            cb=[keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.1, patience=10)]
+            cb=[keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=10, verbose=1)]
         else:
             if (self.nb_output_channels==self.nb_input_channels):
                 Y_val = X_val
