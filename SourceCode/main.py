@@ -1,5 +1,6 @@
 import numpy as np
 from testsShallowAE import testShallowAEnoAMD
+from testShallowAEwithAMD import testShallowAEwithAMD
 from testKLdiv import test_KL_div
 import keras
 

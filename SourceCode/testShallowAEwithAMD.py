@@ -8,7 +8,7 @@ import morphoMaths
 PATH_TO_MODELS_DIR = "../ShallowAE/WithAMD"
 PATH_TO_DATA = "../"
 
-def testShallowAEwithAMD(latent_dimensions=[100], nb_epochs=200, svm=False, path_to_dir = "../ShallowAE/WithAMD/"):
+def testShallowAEwithAMD(latent_dimensions=[100], nb_epochs=200, svm=False, path_to_dir = "../ShallowAE/SeveralChannels/WithAMD/"):
     x_train, _, x_test, y_test = bastien_utils.load_data(PATH_TO_DATA, train=True, test=True, subsetTest=False)
     x_train = morphoMaths.AMD_in_one_array(x_train[:,:,:,0])
     x_test = morphoMaths.AMD_in_one_array(x_test[:,:,:,0])
