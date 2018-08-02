@@ -9,7 +9,7 @@ PATH_TO_DATA = "../"
 
 def testDims(ShallowAE_class=ShallowAE, latent_dimensions=[100], nb_epochs=400, nb_input_channels=1, one_channel_output=True,
             AMD=False, AMD_step=1, AMD_init_step=1,
-            svm=False, path_to_dir = "../ShallowAE/", **kwargs):
+            svm=False, path_to_dir = "../ShallowAE/", nonNeg=False, **kwargs):
     x_train, _, x_test, y_test = bastien_utils.load_data(PATH_TO_DATA, train=True, test=True, subsetTest=False)
     if (nb_input_channels>1):
         if AMD:
@@ -22,13 +22,16 @@ def testDims(ShallowAE_class=ShallowAE, latent_dimensions=[100], nb_epochs=400, 
                 nb_input_channels=1
         else:        
             x_train = np.tile(x_train, (1,1,1,nb_input_channels))
-            x_test = np.tile(x_test, (1,1,1,nb_input_channels))
+            x_test = np.tile(x_test, (1,1,1,nb_inpuht_channels))
             path_to_dir=path_to_dir+"/SeveralChannels/NoAMD/"
 
     d = datetime.date.today()
     strDims = str(latent_dimensions[0]) + "_" + str(latent_dimensions[-1]) 
     strDate = d.strftime("%y_%m_%d")
-    out_path = path_to_dir + "/Simple/TestOutputs/" + strDate
+    if nonNeg:
+        out_path = path_to_dir + "/NonNegativity/NonNegConstraint/TestOutputs/" + strDate
+    else:
+        out_path = path_to_dir + "/Simple/TestOutputs/" + strDate
     nb_run = len(latent_dimensions)
     train_rec_errors = np.zeros(nb_run)
     test_rec_errors = np.zeros(nb_run)

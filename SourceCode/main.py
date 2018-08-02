@@ -22,7 +22,7 @@ print(keras.__version__)
 
 #testShallowAEnoAMD(latent_dimensions=[100], svm=True)
 
-testDims(ShallowAE_class=NonNegShallowAE_NonNegConstraint, latent_dimensions=[100], svm=True)
+testDims(ShallowAE_class=NonNegShallowAE_NonNegConstraint, latent_dimensions=[100], svm=True, nonNeg=True)
 
 testDims(svm=True)
 
