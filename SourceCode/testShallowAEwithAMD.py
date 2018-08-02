@@ -28,10 +28,12 @@ def testShallowAEwithAMD(latent_dimensions=[100], nb_epochs=200, svm=False, path
     np.save(out_path +'_dims_' + strDims, latent_dimensions)
     if svm:
         SVM_classification_accuracy = np.zeros(nb_run)
+        SVM_best_C_parameter = np.zeros(nb_run)
+        SVM_best_gamma_parameter = np.zeros(nb_run)
     for idx, d in enumerate(latent_dimensions):
         shAE = ShallowAE(latent_dim=d, nb_input_channels=6, one_channel_output=True)
         shAE.train(x_train, nb_epochs=nb_epochs, X_val=x_test, verbose=2)
-        shAE.save(path_to_model_directory="../ShallowAE/WithAMD/")
+        shAE.save(path_to_model_directory=path_to_dir)
         train_rec_errors[idx] =shAE.reconstruction_error(x_train)
         test_rec_errors[idx] = shAE.reconstruction_error(x_test)
         sparsity_train[idx] = shAE.sparsity_measure(x_train)
@@ -51,8 +53,14 @@ def testShallowAEwithAMD(latent_dimensions=[100], nb_epochs=200, svm=False, path
         np.save(out_path +'_training_max_approx_error_toRec_dilatation_' + strDims, max_approx_error_toRec_train)
         np.save(out_path +'_test_max_approx_error_toRec_dilation_' + strDims, max_approx_error_toRec_test)
         if svm:
-            SVM_classification_accuracy[idx] = shAE.best_SVM_classification_score(x_test, y_test, nb_values_C=10, nb_values_gamma=10)[0]
+            SVM_classif = shAE.best_SVM_classification_score(x_test, y_test, nb_values_C=10, nb_values_gamma=10)
+            SVM_classification_accuracy[idx] = SVM_classif[0]
+            SVM_best_C_parameter[idx] = SVM_classif[1]['C']
+            SVM_best_gamma_parameter[idx] = SVM_classif[1]['gamma']
             np.save(out_path +'_svm_acc_' + strDims, SVM_classification_accuracy)
+            np.save(out_path +'_svm_best_C_' + strDims, SVM_best_C_parameter)
+            np.save(out_path +'_svm_best_gamma_' + strDims, SVM_best_gamma_parameter)
+
     if svm:
         results = pd.DataFrame(data={'dimension':latent_dimensions,
                                 'training_error':train_rec_errors, 'test_error':test_rec_errors,
@@ -61,7 +69,8 @@ def testShallowAEwithAMD(latent_dimensions=[100], nb_epochs=200, svm=False, path
                                 'test_max_approx_error_toOriginal_dilatation':max_approx_error_toOriginal_test,
                                 'training_max_approx_error_toRec_dilatation':max_approx_error_toRec_train,
                                 'test_max_approx_error_toRec_dilatation':max_approx_error_toRec_test,
-                                'SVM_classification_score':SVM_classification_accuracy})
+                                'SVM_classification_score':SVM_classification_accuracy,
+                                'SVM_best_C':SVM_best_C_parameter, 'SVM_best_gamma':SVM_best_gamma_parameter})
     else:
             results = pd.DataFrame(data={'dimension':latent_dimensions,
                                 'training_error':train_rec_errors, 'test_error':test_rec_errors,
