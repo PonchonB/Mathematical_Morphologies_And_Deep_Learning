@@ -7,7 +7,7 @@ from testKLdiv import test_KL_div
 from testAE import testDims
 import keras
 
-print(keras.__version__)
+print("Keras version: ", keras.__version__)
 #dims = [1, 5, 10, 20, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 784]
 
 #testShallowAE(latent_dimensions=dims, svm=True)
