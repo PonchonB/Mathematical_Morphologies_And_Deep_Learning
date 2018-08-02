@@ -2,19 +2,20 @@ import numpy as np
 import bastien_utils
 from shallowAE import ShallowAE
 from sparseShallowAE import SparseShallowAE_KL, SparseShallowAE_L1, SparseShallowAE_KL_sum
+from nonNegSparseShallowAE import Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint
 import datetime
 import pandas as pd
 import morphoMaths
 
-PATH_TO_MODELS_DIR = "../ShallowAE/"
 PATH_TO_DATA = "../"
 
-def test_KL_div(sparsity_weights = [1], sparsity_objectives = [0.1], latent_dimension=100, nb_epochs=200, svm=False, path_to_dir = "../ShallowAE/"):
+def test_KL_div(sparsity_weights = [1], sparsity_objectives = [0.1], latent_dimension=100, nb_epochs=400, svm=False, 
+                path_to_dir = "../ShallowAE/"):
     x_train, ytrain, x_test, y_test = bastien_utils.load_data(PATH_TO_DATA, train=True, test=True, subsetTest=False)
     d = datetime.date.today()
-    strDims = 'test_sparsity_hyperparameters' 
+    strDims = 'dim' + str(latent_dimension) 
     strDate = d.strftime("%y_%m_%d")
-    out_path = path_to_dir + "/Sparse/KL_div_sum/TestOutputs/" + strDate
+    out_path = path_to_dir + "Sparse_NonNeg/KLdivSum_NonNegConstraint/TestOutputs/" + strDate
     nb_sparsity_weights = len(sparsity_weights)
     nb_sparsity_objectives = len(sparsity_objectives)
     train_rec_errors = np.zeros((nb_sparsity_weights, nb_sparsity_objectives))
@@ -33,7 +34,7 @@ def test_KL_div(sparsity_weights = [1], sparsity_objectives = [0.1], latent_dime
         SVM_classification_accuracy = np.zeros((nb_sparsity_weights, nb_sparsity_objectives))
     for idx1, sp_w in enumerate(sparsity_weights):
         for idx2, sp_o in enumerate(sparsity_objectives):
-            shAE = SparseShallowAE_KL_sum(latent_dim=latent_dimension, sparsity_weight=sp_w, sparsity_objective=sp_o)
+            shAE = Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint(latent_dim=latent_dimension, sparsity_weight=sp_w, sparsity_objective=sp_o)
             shAE.train(x_train, nb_epochs=nb_epochs, X_val=x_test, verbose=2)
             shAE.save()
             train_rec_errors[idx1, idx2] =shAE.reconstruction_error(x_train)
@@ -72,7 +73,7 @@ def test_KL_div(sparsity_weights = [1], sparsity_objectives = [0.1], latent_dime
                                 'test_max_approx_error_toRec_dilatation':max_approx_error_toRec_test.flatten(),
                                 'SVM_classification_score':SVM_classification_accuracy.flatten()})
     else:
-            results = pd.DataFrame(data={'sparsity_weight':np.repeat(sparsity_weights,len(sparsity_objectives)), 'sparsity_objective':np.tile(sparsity_objectives, len(sparsity_weights)),
+        results = pd.DataFrame(data={'sparsity_weight':np.repeat(sparsity_weights,len(sparsity_objectives)), 'sparsity_objective':np.tile(sparsity_objectives, len(sparsity_weights)),
                                 'training_error':train_rec_errors.flatten(), 'test_error':test_rec_errors.flatten(),
                                 'training_kl_loss':train_kl_loss.flatten(), 'test_kl_loss':test_kl_loss.flatten(),
                                 'training_sparsity':sparsity_train.flatten(), 'test_sparsity':sparsity_test.flatten(),

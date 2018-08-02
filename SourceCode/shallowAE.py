@@ -423,6 +423,17 @@ class ShallowAE:
         sigma = (sqrt - (np.linalg.norm(H, ord=1, axis=1)/np.linalg.norm(H, ord=2, axis=1)+0.0000001))/(sqrt - 1)
         return np.mean(sigma)
 
+    def plot_histograms_of_the_encoding(self, X):
+        """
+        Plots the histogram of the encoding of each of the images in X (nb_samples, nb_rows, nb_columns, nb_channels)
+        """
+        H = self.encode(X)
+        plt.figure(figsize=(30, 4))
+        for i in range(10):
+            ax = plt.subplot(1, 10, i + 1)
+            ax.hist(H[i], bins=self.latent_dim)
+        plt.show()
+
 
 
 
