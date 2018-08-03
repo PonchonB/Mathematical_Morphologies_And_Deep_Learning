@@ -9,13 +9,28 @@ import morphoMaths
 
 PATH_TO_DATA = "../"
 
-def test_KL_div(sparsity_weights = [1], sparsity_objectives = [0.1], latent_dimension=100, nb_epochs=400, svm=False, 
+def test_KL_div(sparsity_weights = [1], sparsity_objectives = [0.1], latent_dimension=100, nb_epochs=400, 
+                nb_input_channels=1, one_channel_output=True,
+                AMD=False, AMD_step=1, AMD_init_step=1, svm=False, 
                 path_to_dir = "../ShallowAE/"):
     x_train, ytrain, x_test, y_test = bastien_utils.load_data(PATH_TO_DATA, train=True, test=True, subsetTest=False)
+    if (nb_input_channels>1):
+        if AMD:
+            if (nb_input_channels>2):
+                x_train = morphoMaths.AMD_in_one_array(x_train[:,:,:,0], levels=nb_input_channels-2, step=AMD_step, init_step=AMD_init_step)
+                x_test = morphoMaths.AMD_in_one_array(x_test[:,:,:,0], levels=nb_input_channels-2, step=AMD_step, init_step=AMD_init_step)
+                path_to_dir=path_to_dir+"/SeveralChannels/WithAMD/"
+            else:
+                print('nb_input_channels is supposed to be greater than 2 to be used with AMD: ...setting to 1...')
+                nb_input_channels=1
+        else:        
+            x_train = np.tile(x_train, (1,1,1,nb_input_channels))
+            x_test = np.tile(x_test, (1,1,1,nb_input_channels))
+            path_to_dir=path_to_dir+"/SeveralChannels/NoAMD/"
     d = datetime.date.today()
     strDims = 'dim' + str(latent_dimension) 
     strDate = d.strftime("%y_%m_%d")
-    out_path = path_to_dir + "Sparse_NonNeg/KLdivSum_NonNegConstraint/TestOutputs/" + strDate
+    out_path = path_to_dir + "Sparse/KL_div_sum/TestOutputs/" + strDate
     nb_sparsity_weights = len(sparsity_weights)
     nb_sparsity_objectives = len(sparsity_objectives)
     train_rec_errors = np.zeros((nb_sparsity_weights, nb_sparsity_objectives))
@@ -34,9 +49,9 @@ def test_KL_div(sparsity_weights = [1], sparsity_objectives = [0.1], latent_dime
         SVM_classification_accuracy = np.zeros((nb_sparsity_weights, nb_sparsity_objectives))
     for idx1, sp_w in enumerate(sparsity_weights):
         for idx2, sp_o in enumerate(sparsity_objectives):
-            shAE = Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint(latent_dim=latent_dimension, sparsity_weight=sp_w, sparsity_objective=sp_o)
+            shAE = SparseShallowAE_KL_sum(latent_dim=latent_dimension, sparsity_weight=sp_w, sparsity_objective=sp_o, nb_input_channels=nb_input_channels, one_channel_output=one_channel_output)
             shAE.train(x_train, nb_epochs=nb_epochs, X_val=x_test, verbose=2)
-            shAE.save()
+            shAE.save(path_to_model_directory=path_to_dir)
             train_rec_errors[idx1, idx2] =shAE.reconstruction_error(x_train)
             test_rec_errors[idx1, idx2] = shAE.reconstruction_error(x_test)
             train_kl_loss[idx1, idx2] = shAE.total_loss(x_train) - train_rec_errors[idx1, idx2]

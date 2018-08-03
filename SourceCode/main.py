@@ -14,11 +14,15 @@ print("Keras version: ", keras.__version__)
 
 #testShallowAEwithAMD(latent_dimensions=[100], svm=True)
 
-sparsity_weights = [0.01, 0.1, 0.5, 1, 3]
+sparsity_weights = [0.01, 0.1, 0.5, 1, 3    ]
 sparsity_objectives = [0.01, 0.05, 0.1, 0.2]
 #dims = [5, 10, 50, 100, 200, 500]
 
-test_KL_div(latent_dimension=100, sparsity_weights=sparsity_weights, sparsity_objectives=sparsity_objectives, svm=False)
+#test_KL_div(latent_dimension=100, sparsity_weights=sparsity_weights, sparsity_objectives=sparsity_objectives, svm=False)
+
+test_KL_div(latent_dimension=100, sparsity_weights=sparsity_weights, sparsity_objectives=sparsity_objectives, svm=False
+            , nb_input_channels=6, one_channel_output=True, AMD=True)
+
 
 #testShallowAEnoAMD(latent_dimensions=[100], svm=True)
 
