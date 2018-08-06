@@ -92,14 +92,12 @@ class ShallowAE:
             cb = None
         elif type(X_val) is tuple:
             validation_data=X_val
-            cb=[keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=10, verbose=1)]
         else:
             if (self.nb_output_channels==self.nb_input_channels):
                 Y_val = X_val
             else:
                 Y_val = X_val[:,:,:,0].reshape((X_val.shape[0], self.nb_rows, self.nb_columns, 1))
             validation_data = (X_val, Y_val)
-            cb=[keras.callbacks.EarlyStopping(monitor='val_loss', min_delta=0.0001, patience=10, verbose=1)]
         if X_train_expected_output is None:
             if (self.nb_output_channels==self.nb_input_channels):
                 Y_train = X_train
@@ -112,9 +110,8 @@ class ShallowAE:
                 batch_size=128,
                 shuffle=True,
                 validation_data=validation_data, 
-                verbose=verbose,
-                callbacks=cb)
-        
+                verbose=verbose)
+                        
     def get_encoder(self):
         return self.encoder
     
