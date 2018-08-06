@@ -3,6 +3,7 @@ from testsShallowAE import testShallowAEnoAMD
 from testShallowAEwithAMD import testShallowAEwithAMD
 from nonNegShallowAE import NonNegShallowAE_NonNegConstraint
 from sparseShallowAE import SparseShallowAE_KL_sum
+from nonNegSparseShallowAE import Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint
 from testKLdiv import test_KL_div
 from testAE import testDims
 import keras

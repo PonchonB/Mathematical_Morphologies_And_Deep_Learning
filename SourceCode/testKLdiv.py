@@ -30,7 +30,7 @@ def test_KL_div(sparsity_weights = [1], sparsity_objectives = [0.1], latent_dime
     d = datetime.date.today()
     strDims = 'dim' + str(latent_dimension) 
     strDate = d.strftime("%y_%m_%d")
-    out_path = path_to_dir + "Sparse/KL_div_sum/TestOutputs/" + strDate
+    out_path = path_to_dir + "Sparse_NonNeg/KLdivSum_NonNegConstraint/TestOutputs/" + strDate
     nb_sparsity_weights = len(sparsity_weights)
     nb_sparsity_objectives = len(sparsity_objectives)
     train_rec_errors = np.zeros((nb_sparsity_weights, nb_sparsity_objectives))
@@ -49,7 +49,9 @@ def test_KL_div(sparsity_weights = [1], sparsity_objectives = [0.1], latent_dime
         SVM_classification_accuracy = np.zeros((nb_sparsity_weights, nb_sparsity_objectives))
     for idx1, sp_w in enumerate(sparsity_weights):
         for idx2, sp_o in enumerate(sparsity_objectives):
-            shAE = SparseShallowAE_KL_sum(latent_dim=latent_dimension, sparsity_weight=sp_w, sparsity_objective=sp_o, nb_input_channels=nb_input_channels, one_channel_output=one_channel_output)
+            shAE = Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint(latent_dim=latent_dimension, 
+                                                                    sparsity_weight=sp_w, sparsity_objective=sp_o, 
+                                                                    nb_input_channels=nb_input_channels, one_channel_output=one_channel_output)
             shAE.train(x_train, nb_epochs=nb_epochs, X_val=x_test, verbose=2)
             shAE.save(path_to_model_directory=path_to_dir)
             train_rec_errors[idx1, idx2] =shAE.reconstruction_error(x_train)
