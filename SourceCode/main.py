@@ -41,5 +41,5 @@ print("Keras version: ", keras.__version__)
 #for d in dims:
 #    test_KL_div(latent_dimension=d, sparsity_weights=sparsity_weights, sparsity_objectives=sparsity_objectives, svm=False)
 
-
-testDims(svm=True, nb_input_channels=5, AMD=True, add_original_images=False)
+#testDims(svm=True, nb_input_channels=5, AMD=True, add_original_images=False)
+testDims(ShallowAE_class=NonNegShallowAE_NonNegConstraint, nb_epochs=500, svm=True, nb_input_channels=6, AMD=True, add_original_images=False)
