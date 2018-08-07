@@ -383,7 +383,7 @@ class ShallowAE:
         AE.decoder.set_weights([W_op, b_op])
         return AE
         
-    def max_approximation_error(self, X, operator, apply_to_bias=False, **kwargs):
+    def max_approximation_error(self, X, operator, original_images=None, apply_to_bias=False, **kwargs):
         """
         Computes the mse between the application of the operator to the images of X_rec (n_samples, n_rows, n_columns), 
         the application of the operator to the reconstructions of the images of X_rec by the autoencoder, and the decoding after 
@@ -402,7 +402,10 @@ class ShallowAE:
             return result
         AE_op = self.apply_operator_to_decoder_atoms(operator, apply_to_bias=apply_to_bias, **kwargs)
         X_rec = self.reconstruction(X)
-        X_op = apply_operator_to_all_images(X)
+        if original_images is None:
+            X_op = apply_operator_to_all_images(X)
+        else:
+            X_op = apply_operator_to_all_images(original_images)
         X_rec_op = apply_operator_to_all_images(X_rec)
         error_To_Original = AE_op.reconstruction_error(X, X_rec_th=X_op)
         error_To_Reconstruction = AE_op.reconstruction_error(X, X_rec_th=X_rec_op)
