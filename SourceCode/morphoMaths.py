@@ -107,12 +107,17 @@ def AMD(X,levels=4,step=1, init_step=1):
         R[i] = (RN - RP)/2.
     return R,S
 
-def AMD_in_one_array(X, levels=4,step=1, init_step=1):
+def AMD_in_one_array(X, levels=4,step=1, init_step=1, add_original_images=True):
     """
     AMD of the set of images X of shape (N_images, N_rows, N_columns)
     Returns the transformed data, in the shape (N_images, N_rows, N_columns, N_AMD_element)
+    If add_original_images=True, then N_AMD_elements = step + 2
+    Else: N_AMD_elements = step + 1
     """
     R,S = AMD(X, levels=levels,step=step, init_step=init_step)
     nb_images, nb_rows, nb_columns = X.shape
-    amd = np.concatenate((X.reshape((nb_images, nb_rows, nb_columns, 1)), R, S.reshape((nb_images, nb_rows, nb_columns, 1))), axis=3)
+    if add_original_images:
+        amd = np.concatenate((X.reshape((nb_images, nb_rows, nb_columns, 1)), R, S.reshape((nb_images, nb_rows, nb_columns, 1))), axis=3)
+    else:
+        amd = np.concatenate((R, S.reshape((nb_images, nb_rows, nb_columns, 1))), axis=3)
     return amd 
