@@ -9,6 +9,7 @@ import h5py
 from matplotlib import offsetbox
 from sklearn.svm import SVC
 from sklearn.model_selection import KFold
+from skimage import exposure
 
 import sys
 sys.path.append('../fashion_mnist')
@@ -91,7 +92,19 @@ def plot_all_images(X, channel_to_plot=0):
         ax.get_yaxis().set_visible(False)
     plt.show()
 
-    
+def rescale_all_channels_between_0_and_1(X):
+    x_prep = np.copy(X)
+    nb_samples, nb_rows, nb_columns, nb_channels = X.shape
+    max_per_channel = np.max(X, axis=(0,1,2))
+    min_per_channel = np.min(X, axis=(0,1,2))
+    for j in range(nb_channels):
+        in_min = min_per_channel[j]
+        in_max = max_per_channel[j]
+        for i in range(nb_samples):
+            x_prep[i,:,:,j] = exposure.rescale_intensity(X[i,:,:,j], in_range=(in_min, in_max), out_range=(0, 1))
+    return x_prep
+
+
 #### The following function are deprecated, equivalents exist in the ShallowAE class
  
 def load_AE(path, custom_objects={}):
