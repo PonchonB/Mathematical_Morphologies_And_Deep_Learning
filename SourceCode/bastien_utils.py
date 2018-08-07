@@ -94,7 +94,7 @@ def plot_all_images(X, channel_to_plot=0):
 
 def rescale_all_channels_between_0_and_1(X):
     x_prep = np.copy(X)
-    nb_samples, nb_rows, nb_columns, nb_channels = X.shape
+    nb_samples, _, _, nb_channels = X.shape
     max_per_channel = np.max(X, axis=(0,1,2))
     min_per_channel = np.min(X, axis=(0,1,2))
     for j in range(nb_channels):
