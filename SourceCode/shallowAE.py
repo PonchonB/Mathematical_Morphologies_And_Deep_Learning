@@ -420,7 +420,7 @@ class ShallowAE:
         """
         H = self.encode(X)
         sqrt = math.sqrt(self.latent_dim)
-        sigma = (sqrt - (np.linalg.norm(H, ord=1, axis=1)/np.linalg.norm(H, ord=2, axis=1)+0.0000001))/(sqrt - 1)
+        sigma = (sqrt - (np.linalg.norm(H, ord=1, axis=1)/(np.linalg.norm(H, ord=2, axis=1)+0.0000001))/(sqrt - 1)
         return np.mean(sigma)
 
     def plot_histograms_of_the_encoding(self, X):
