@@ -392,7 +392,7 @@ class ShallowAE:
             X: Numpy array of shape (n_samples, n_rows, n_columns, nb_channels), the first channel must be the original image
             operator: A callable function, that takes an image as input.
             **kwargs: Other arguments of the operator.
-        """ 
+        """
         nb_samples = X.shape[0]
         def apply_operator_to_all_images(X):
             result = np.zeros((nb_samples, self.nb_rows, self.nb_columns, self.nb_output_channels))
@@ -420,7 +420,7 @@ class ShallowAE:
         """
         H = self.encode(X)
         sqrt = math.sqrt(self.latent_dim)
-        sigma = (sqrt - (np.linalg.norm(H, ord=1, axis=1)/(np.linalg.norm(H, ord=2, axis=1)+0.0000001))/(sqrt - 1)
+        sigma = (sqrt - (np.linalg.norm(H, ord=1, axis=1)/(np.linalg.norm(H, ord=2, axis=1)+0.0000001)))/(sqrt - 1)
         return np.mean(sigma)
 
     def plot_histograms_of_the_encoding(self, X):
