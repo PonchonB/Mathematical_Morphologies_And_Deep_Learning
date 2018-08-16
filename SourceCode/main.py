@@ -57,4 +57,19 @@ sparsity_objectives = [0.01, 0.05, 0.1, 0.2]
 #            latent_dimension=100, nb_input_channels=7, one_channel_output=True, AMD=True, add_original_images=True)
 
 ###18_08_11
-testDims(ShallowAE_class=ShallowAE, nb_epochs=500, nb_input_channels=1, svm=True)
+#testDims(ShallowAE_class=ShallowAE, nb_epochs=500, nb_input_channels=1, svm=True)
+
+###18_08_12
+#testDims(ShallowAE_class=NonNegShallowAE_NonNegConstraint, nb_epochs=500, nb_input_channels=1, svm=True)
+
+####18_08_14
+#test_KL_div(ShallowAE_class=Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint, nb_epochs=500, sparsity_objectives=sparsity_objectives, sparsity_weights=sparsity_weights,
+#            latent_dimension=100, nb_input_channels=1, one_channel_output=True)
+
+sparsity_weights = [0.0001, 0.0005, 0.001, 0.005]
+sparsity_objectives = [0.01, 0.05, 0.1, 0.2]
+
+###18_08_16
+test_KL_div(ShallowAE_class=Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint, nb_epochs=500, sparsity_objectives=sparsity_objectives, sparsity_weights=sparsity_weights,
+            latent_dimension=100, nb_input_channels=1, one_channel_output=True)
+
