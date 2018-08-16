@@ -1,5 +1,6 @@
 from keras.regularizers import Regularizer
 from keras import backend as K
+import math
 
 class KL_divergence(Regularizer):
     """KL divergence for Sparsity regularization.
@@ -64,6 +65,24 @@ class L1(Regularizer):
     def get_config(self):
         return {'beta': float(self.beta)}
         
+class sparseness(Regularizer):
+    """
+    Using the sparseness measure from Hoyer 2004 (Sparse-NMF) to enforce sparsity.
+    # Arguments
+        beta: Float; Weight of the regularizer in the total cost function to be minimized.
+    """
+    def __init__(self, beta=1):
+        self.beta = K.cast_to_floatx(beta)
+
+    def __call__(self, x):
+        dim = K.int_shape(x)[1]
+        l1_l2_ratio = K.sum(K.abs(x), axis=1)/(K.sqrt(K.sum(K.square(x), axis=1)) + K.epsilon())
+        sp = (math.sqrt(dim) - l1_l2_ratio)/(math.sqrt(dim) - 1 + K.epsilon())
+        return self.beta*(1-K.mean(sp))
+    
+    def get_config(self):
+        return {'beta': float(self.beta)}
+
 
 class asymmetric_weight_decay(Regularizer):
     """Asymmetric weight decay for Non_Negativity constraint.

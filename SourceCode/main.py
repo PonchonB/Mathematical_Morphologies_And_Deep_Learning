@@ -3,7 +3,7 @@ from testsShallowAE import testShallowAEnoAMD
 from testShallowAEwithAMD import testShallowAEwithAMD
 from nonNegShallowAE import NonNegShallowAE_NonNegConstraint
 from sparseShallowAE import SparseShallowAE_KL_sum
-from nonNegSparseShallowAE import Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint
+from nonNegSparseShallowAE import Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint, Sparse_NonNeg_ShallowAE_KLsum_AsymDecay
 from shallowAE import ShallowAE
 from testKLdiv import test_KL_div
 from testAE import testDims
@@ -70,6 +70,12 @@ sparsity_weights = [0.0001, 0.0005, 0.001, 0.005]
 sparsity_objectives = [0.01, 0.05, 0.1, 0.2]
 
 ###18_08_16
-test_KL_div(ShallowAE_class=Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint, nb_epochs=500, sparsity_objectives=sparsity_objectives, sparsity_weights=sparsity_weights,
-            latent_dimension=100, nb_input_channels=1, one_channel_output=True)
+#test_KL_div(ShallowAE_class=Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint, nb_epochs=500, sparsity_objectives=sparsity_objectives, sparsity_weights=sparsity_weights,
+#            latent_dimension=100, nb_input_channels=1, one_channel_output=True)
 
+sparsity_weights = [0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5]
+sparsity_objectives = [0.01, 0.05, 0.1, 0.2]
+
+###18_08_16
+test_KL_div(ShallowAE_class=Sparse_NonNeg_ShallowAE_KLsum_AsymDecay, nb_epochs=500, sparsity_objectives=sparsity_objectives, sparsity_weights=sparsity_weights,
+            latent_dimension=100, nb_input_channels=1, one_channel_output=True)

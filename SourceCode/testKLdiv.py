@@ -2,7 +2,7 @@ import numpy as np
 import bastien_utils
 from shallowAE import ShallowAE
 from sparseShallowAE import SparseShallowAE_KL, SparseShallowAE_L1, SparseShallowAE_KL_sum
-from nonNegSparseShallowAE import Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint
+from nonNegSparseShallowAE import Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint, Sparse_NonNeg_ShallowAE_KLsum_AsymDecay
 import datetime
 import pandas as pd
 import morphoMaths
@@ -43,6 +43,8 @@ def test_KL_div(ShallowAE_class=SparseShallowAE_KL_sum, sparsity_weights = [1], 
         out_path = path_to_dir + "/Sparse/KL_div_sum/TestOutputs/" + strDate
     elif ShallowAE_class==Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint:
         out_path = path_to_dir + "/Sparse_NonNeg/KLdivSum_NonNegConstraint/TestOutputs/" + strDate
+    elif ShallowAE_class==Sparse_NonNeg_ShallowAE_KLsum_AsymDecay:
+        out_path = path_to_dir + "/Sparse_NonNeg/KLdivSum_AsymDecay/TestOutputs/" + strDate
     nb_sparsity_weights = len(sparsity_weights)
     nb_sparsity_objectives = len(sparsity_objectives)
     train_rec_errors = np.zeros((nb_sparsity_weights, nb_sparsity_objectives))
