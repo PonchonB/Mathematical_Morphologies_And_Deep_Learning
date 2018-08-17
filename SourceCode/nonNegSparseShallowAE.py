@@ -450,7 +450,10 @@ class Sparse_NonNeg_ShallowAE_KLsum_AsymDecay(ShallowAE):
         x = Flatten()(input_img)
         encoded = Dense(latent_dim, activation='sigmoid', 
                             activity_regularizer=custom_regularizers.KL_divergence_sum(beta=self.sparsity_weight, 
-                                                                                        rho=self.sparsity_objective))(x)
+                                                                                        rho=self.sparsity_objective),
+                            kernel_regularizer=custom_regularizers.asymmetric_weight_decay(alpha=self.decay_positive_weights, 
+                                                                                            beta=self.decay_negative_weights, 
+                                                                                            lam=self.decay_weight))(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
         x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels, 

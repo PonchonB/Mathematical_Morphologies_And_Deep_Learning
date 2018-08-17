@@ -434,6 +434,15 @@ class ShallowAE:
             ax.hist(H[i], bins=self.latent_dim)
         plt.show()
 
+    def KL_divergence(self, X, sparsity_objective=0.01, sparsity_weight=1):
+        """
+        Computes the KL divergence sparsity measure of the encoding of X.
+        """
+        H = self.encode(X)
+        s_hat = np.mean(H, axis=0)
+        np.clip(s_hat, 0.0000001, 1)
+        val = sparsity_objective*np.log(sparsity_objective/s_hat) + (1-sparsity_objective)*np.log((1-sparsity_objective)/(1-s_hat))
+        return sparsity_weight*np.sum(val)
 
 
 

@@ -2,7 +2,7 @@ import numpy as np
 import bastien_utils
 from shallowAE import ShallowAE
 from sparseShallowAE import SparseShallowAE_KL_sum
-from nonNegSparseShallowAE import Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint
+from nonNegSparseShallowAE import Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint, Sparse_NonNeg_ShallowAE_KLsum_AsymDecay
 from nonNegShallowAE import NonNegShallowAE_NonNegConstraint
 import datetime
 import pandas as pd
@@ -45,6 +45,9 @@ def testDims(ShallowAE_class=ShallowAE, latent_dimensions=[100], nb_epochs=400, 
          out_path = path_to_dir + "/NonNegativity/NonNegConstraint/TestOutputs/" + strDate
     elif ShallowAE_class==Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint:
         out_path = path_to_dir + "/Sparse_NonNeg/KLdivSum_NonNegConstraint/TestOutputs/" + strDate
+    elif ShallowAE_class==Sparse_NonNeg_ShallowAE_KLsum_AsymDecay:
+        out_path = path_to_dir + "/Sparse_NonNeg/KLdivSum_AsymDecay/TestOutputs/" + strDate
+
     else:
         out_path = path_to_dir + "/Simple/TestOutputs/" + strDate
     nb_run = len(latent_dimensions)
