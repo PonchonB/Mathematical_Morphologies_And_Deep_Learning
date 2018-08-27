@@ -10,7 +10,6 @@ from sklearn.model_selection import GridSearchCV, StratifiedShuffleSplit, train_
 from sklearn import svm
 import datetime
 import matplotlib.pyplot as plt
-from sklearn.svm import SVC
 
 class ShallowAE:
     """
@@ -120,6 +119,9 @@ class ShallowAE:
     
     def get_autoencoder(self):
         return self.autoencoder
+    
+    def get_parameters_value(self):
+        return {}
     
     def encode(self, X_test):
         return self.encoder.predict(X_test)
@@ -352,7 +354,7 @@ class ShallowAE:
         """
         H =self.encode(X)
         H_train, H_test, Y_train, Y_test = train_test_split(H, y, test_size=0.1)
-        svm = SVC(C=C, kernel=kernel, gamma=gamma, degree=degree, cache_size=600)
+        svm = svm.SVC(C=C, kernel=kernel, gamma=gamma, degree=degree, cache_size=600)
         svm.fit(H_train, Y_train)
         return svm.score(H_test, Y_test)
 
@@ -434,10 +436,34 @@ class ShallowAE:
             ax.hist(H[i], bins=self.latent_dim)
         plt.show()
 
-    def KL_divergence(self, X, sparsity_objective=0.01, sparsity_weight=1):
+    def plot_histograms_of_the_decoder_atoms(self):
         """
-        Computes the KL divergence sparsity measure of the encoding of X.
+        Plots the histogram of the values of all the atoms of the decoder
         """
+        atoms = self.atom_images_decoder()
+        plt.hist(atoms.flatten(), bins=40)
+        plt.title('Histogram of values of all the atoms of the decoder')
+        plt.show()
+
+    def KL_divergence(self, X, sparsity_objective=None, sparsity_weight=None, multiply_by_weight_penalty=True):
+        """
+        Computes the KL divergence sparsity measure of the encoding of X, with a specific set of parameters of the cost function.
+        sparsity_objective: float in [0,1] or None. In the latter case, the value of the model configuration is used (if any)
+        sparsity_weight: float or None. In the latter case, the value of the model configuration is used (if any).
+        """
+        try:
+            if sparsity_objective is None:
+                sparsity_objective=self.get_parameters_value()['sparsity_objective']
+            if not multiply_by_weight_penalty:
+                sparsity_weight=1
+            elif sparsity_weight is None:
+                sparsity_weight=self.get_parameters_value()['sparsity_weight']
+        except KeyError as err:
+                print('Instance has no parameter', err, '(maybe not implementing KL regularizer.\n')
+                print("Specify", err, "to compute KL divergence sparsity measure.\n")
+                print("Setting sparsity_objective = 0.6 and sparsity_weight=1...")
+                sparsity_weight=1
+                sparsity_objective=0.6
         H = self.encode(X)
         s_hat = np.mean(H, axis=0)
         np.clip(s_hat, 0.0000001, 1)

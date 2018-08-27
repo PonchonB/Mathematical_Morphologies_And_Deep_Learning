@@ -489,9 +489,9 @@ class Sparse_NonNeg_ShallowAE_KLsum_AsymDecay(ShallowAE):
         loaded_AE.nb_columns = loaded_AE.encoder.input_shape[2]
         loaded_AE.sparsity_weight = loaded_AE.encoder.get_config()['layers'][2]['config']['activity_regularizer']['config']['beta']
         loaded_AE.sparsity_objective = loaded_AE.encoder.get_config()['layers'][2]['config']['activity_regularizer']['config']['rho']
-        loaded_AE.decay_positive_weights = loaded_AE.encoder.get_config()['layers'][2]['config']['kernel_regularizer']['config']['alpha']
-        loaded_AE.decay_negative_weights = loaded_AE.encoder.get_config()['layers'][2]['config']['kernel_regularizer']['config']['beta']
-        loaded_AE.decay_weight = loaded_AE.encoder.get_config()['layers'][2]['config']['kernel_regularizer']['config']['lam']
+        loaded_AE.decay_positive_weights = loaded_AE.decoder.get_config()['layers'][1]['config']['kernel_regularizer']['config']['alpha']
+        loaded_AE.decay_negative_weights = loaded_AE.decoder.get_config()['layers'][1]['config']['kernel_regularizer']['config']['beta']
+        loaded_AE.decay_weight = loaded_AE.decoder.get_config()['layers'][1]['config']['kernel_regularizer']['config']['lam']
         return loaded_AE
 
     def save(self, path_to_model_directory="../ShallowAE/", model_name=None):
