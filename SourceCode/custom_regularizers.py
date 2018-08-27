@@ -70,18 +70,21 @@ class sparseness(Regularizer):
     Using the sparseness measure from Hoyer 2004 (Sparse-NMF) to enforce sparsity.
     # Arguments
         beta: Float; Weight of the regularizer in the total cost function to be minimized.
+        sp_o: Float in [0,1], sparsity objective of the measure (the higher the more sparse).
     """
-    def __init__(self, beta=1):
+    def __init__(self, beta=1, sp_o=0.6):
         self.beta = K.cast_to_floatx(beta)
+        self.sp_o = K.cast_to_floatx(sp_o)
 
     def __call__(self, x):
         dim = K.int_shape(x)[1]
         l1_l2_ratio = K.sum(K.abs(x), axis=1)/(K.sqrt(K.sum(K.square(x), axis=1)) + K.epsilon())
-        sp = (math.sqrt(dim) - l1_l2_ratio)/(math.sqrt(dim) - 1 + K.epsilon())
-        return self.beta*(1-K.mean(sp))
+        sqrt = math.sqrt(dim) 
+        sp = (sqrt - l1_l2_ratio)/(sqrt - 1 + K.epsilon())
+        return self.beta*K.mean(K.abs(self.sp_o - sp))
     
     def get_config(self):
-        return {'beta': float(self.beta)}
+        return {'beta': float(self.beta), 'sp_o':float(self.sp_o)}
 
 
 class asymmetric_weight_decay(Regularizer):
