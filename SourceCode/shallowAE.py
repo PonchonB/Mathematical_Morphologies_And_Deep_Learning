@@ -461,9 +461,9 @@ class ShallowAE:
         except KeyError as err:
                 print('Instance has no parameter', err, '(maybe not implementing KL regularizer.\n')
                 print("Specify", err, "to compute KL divergence sparsity measure.\n")
-                print("Setting sparsity_objective = 0.6 and sparsity_weight=1...")
+                print("Setting sparsity_objective = 0.01 and sparsity_weight=1...")
                 sparsity_weight=1
-                sparsity_objective=0.6
+                sparsity_objective=0.01
         H = self.encode(X)
         return metrics.sparsity_KL_divergence(H, sparsity_objective=sparsity_objective, sparsity_weight=sparsity_weight, multiply_by_weight_penalty=multiply_by_weight_penalty)
 

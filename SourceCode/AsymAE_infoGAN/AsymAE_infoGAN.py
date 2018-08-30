@@ -339,7 +339,7 @@ class AsymAEinfoGAN:
                 b_op[:,:,i] = operator(b_op[:,:,i], **kwargs)
             for j in range(self.latent_dim):
                 W_op[j,:,:,i]=operator(W[j,:,:,i], **kwargs)
-        AE = AsymAE_infoGAN(latent_dim=self.latent_dim, nb_rows=self.nb_rows, nb_columns=self.nb_columns,  
+        AE = AsymAEinfoGAN(latent_dim=self.latent_dim, nb_rows=self.nb_rows, nb_columns=self.nb_columns,  
                         nb_input_channels=self.nb_input_channels, one_channel_output=(self.nb_output_channels==1))
         AE.encoder=self.encoder
         W_op = np.reshape(W_op, (self.latent_dim, self.nb_rows*self.nb_columns*self.nb_output_channels))
