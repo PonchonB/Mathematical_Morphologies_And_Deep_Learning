@@ -1,6 +1,6 @@
 import numpy as np
 import bastien_utils
-from AsymAE_infoGAN import AsymAEinfoGAN
+from AsymAE_infoGAN.AsymAE_infoGAN import AsymAEinfoGAN
 import datetime
 import pandas as pd
 import morphoMaths
