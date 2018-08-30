@@ -10,6 +10,7 @@ from sklearn.model_selection import GridSearchCV, StratifiedShuffleSplit, train_
 from sklearn import svm
 import datetime
 import matplotlib.pyplot as plt
+import metrics
 
 class ShallowAE:
     """
@@ -88,7 +89,6 @@ class ShallowAE:
         """
         if X_val is None:
             validation_data = None
-            cb = None
         elif type(X_val) is tuple:
             validation_data=X_val
         else:
@@ -465,11 +465,7 @@ class ShallowAE:
                 sparsity_weight=1
                 sparsity_objective=0.6
         H = self.encode(X)
-        s_hat = np.mean(H, axis=0)
-        np.clip(s_hat, 0.0000001, 1)
-        val = sparsity_objective*np.log(sparsity_objective/s_hat) + (1-sparsity_objective)*np.log((1-sparsity_objective)/(1-s_hat))
-        return sparsity_weight*np.sum(val)
-
+        return metrics.sparsity_KL_divergence(H, sparsity_objective=sparsity_objective, sparsity_weight=sparsity_weight, multiply_by_weight_penalty=multiply_by_weight_penalty)
 
 
 
