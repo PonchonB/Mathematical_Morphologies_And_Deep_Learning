@@ -113,3 +113,17 @@ def best_SVM_classification_score(encodings, labels, min_log_C=-2, max_log_C=3, 
     grid = GridSearchCV(svm.SVC(cache_size=600), param_grid=param_grid, cv=cv, verbose=2)
     grid.fit(H_train, Y_train)
     return grid.score(H_test, Y_test), grid.best_params_ 
+
+def sparsity_KL_divergence(encodings, sparsity_objective=0.01, sparsity_weight=1, multiply_by_weight_penalty=True):
+    """
+    Computes the KL divergence sparsity measure of the encodings, with a specific set of parameters of the cost function.
+        sparsity_objective: float in [0,1].
+        sparsity_weight: positive float.
+        multiply_by_weight_penalty: bool. Weather to multyply the loss function by a weighting term (the sparsity_weight parameter).
+    """
+    s_hat = np.mean(encodings, axis=0)
+    np.clip(s_hat, 0.0000001, 1)
+    val = sparsity_objective*np.log(sparsity_objective/s_hat) + (1-sparsity_objective)*np.log((1-sparsity_objective)/(1-s_hat))
+    if not multiply_by_weight_penalty:
+        sparsity_weight=1
+    return sparsity_weight*np.sum(val)
