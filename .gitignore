@@ -6,5 +6,5 @@ SourceCode/*.pyc
 Notebooks/.ipynb_checkpoints/
 ShallowAE/
 Resources/
+AsymAE_infoGAN/__pycache__/
 AsymAE_infoGAN/
-
