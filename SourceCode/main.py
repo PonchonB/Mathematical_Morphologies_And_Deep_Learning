@@ -8,6 +8,7 @@ from shallowAE import ShallowAE
 from testKLdiv import test_KL_div
 from testAE import testDims
 import keras
+from AsymAE_infoGAN.testAsymAE import testDims_AsymAE
 
 print("Keras version: ", keras.__version__)
 #dims = [1, 5, 10, 20, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 784]
@@ -106,5 +107,9 @@ sparsity_objectives = [0.01, 0.05, 0.1, 0.2]
 #        svm=True, AMD=True, add_original_images=True)
 
 ###18_08_22
-test_KL_div(ShallowAE_class=SparseShallowAE_KL_sum, nb_epochs=500, sparsity_objectives=sparsity_objectives, sparsity_weights=sparsity_weights,
-            latent_dimension=100, nb_input_channels=7, one_channel_output=True, AMD=True, add_original_images=True)
+#test_KL_div(ShallowAE_class=SparseShallowAE_KL_sum, nb_epochs=500, sparsity_objectives=sparsity_objectives, sparsity_weights=sparsity_weights,
+#            latent_dimension=100, nb_input_channels=7, one_channel_output=True, AMD=True, add_original_images=True)
+
+###18_08_30
+### testing simple AE with AEinfoGAN as encoder
+testDims_AsymAE(svm=True)
