@@ -8,7 +8,7 @@ import morphoMaths
 
 PATH_TO_DATA = "../"
 
-def test_KL_div(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint, sparsity_weights = [1], sparsity_objectives = [0.1], latent_dimension=100, nb_epochs=500, 
+def test_KL_div_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint, sparsity_weights = [1], sparsity_objectives = [0.1], latent_dimension=100, nb_epochs=500, 
                 nb_input_channels=1, one_channel_output=True, add_original_images=True,
                 AMD=False, AMD_step=1, AMD_init_step=1, svm=False, 
                 path_to_dir = "../Results/AsymAE_infoGAN/"):

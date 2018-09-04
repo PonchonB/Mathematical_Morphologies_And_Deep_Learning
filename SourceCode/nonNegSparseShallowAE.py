@@ -469,7 +469,7 @@ class Sparse_NonNeg_ShallowAE_KLsum_AsymDecay(ShallowAE):
         self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
 
     @classmethod
-def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/ShallowAE/"):
+    def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/ShallowAE/"):
         """
         Load a autoencoder previously saved with the save method, or a model saved as a h5 file.
         The file is looked for in the directory path_to_model_directory/Sparse_NonNeg/KLdivSum_AsymDecay/Models/.

@@ -2,12 +2,13 @@ import numpy as np
 from nonNegShallowAE import NonNegShallowAE_NonNegConstraint
 from sparseShallowAE import SparseShallowAE_KL_sum
 from nonNegSparseShallowAE import Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint, Sparse_NonNeg_ShallowAE_KLsum_AsymDecay
-from AsymAE_infoGAN.AsymAE_testKLdiv import test_KL_div
 from shallowAE import ShallowAE
 from testKLdiv import test_KL_div
 from testAE import testDims
 import keras
 from AsymAE_infoGAN.testAsymAE import testDims_AsymAE
+from AsymAE_infoGAN.AsymAE_testKLdiv import test_KL_div_Asym_AE
+from AsymAE_infoGAN.nonNegSparseAsymAEinfoGAN import Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint
 
 print("Keras version: ", keras.__version__)
 #dims = [1, 5, 10, 20, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 784]
@@ -116,7 +117,7 @@ sparsity_objectives = [0.01, 0.05, 0.1, 0.2]
 ###18_08_04
 ### testing simple AE with AEinfoGAN and KLdivSum/NonNegConstraint
 ### Note that the repository hierarchy has been changed (putting all Models/TestOutputs in a Results directory)
-test_KL_div(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint, sparsity_weights = sparsity_weights, sparsity_objectives = sparsity_objectives, latent_dimension=100, nb_epochs=500, 
+test_KL_div_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint, sparsity_weights = sparsity_weights, sparsity_objectives = sparsity_objectives, latent_dimension=100, nb_epochs=500, 
                 nb_input_channels=1, one_channel_output=True, add_original_images=True,
                 AMD=False, AMD_step=1, AMD_init_step=1, svm=False, 
                 path_to_dir = "../Results/AsymAE_infoGAN/")
