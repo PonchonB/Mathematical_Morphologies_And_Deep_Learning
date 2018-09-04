@@ -7,7 +7,7 @@ import bastien_utils
 FILE_PATH = "../"
 x_test, y_test = bastien_utils.load_data(FILE_PATH, train=False, test=True, subsetTest=False)
 print('x_test shape:', x_test.shape)
-data = io.loadmat('../NMF/18_08_22_sparseNMF_dim100_spH0.6')
+data = io.loadmat('../Results/NMF/18_08_22_sparseNMF_dim100_spH0.6')
 
 W = data['W']
 H = data['H']
@@ -25,6 +25,6 @@ SVM_best_C_parameter = best_params['C']
 SVM_best_gamma_parameter = best_params['gamma']
 
 results = pd.DataFrame(data={'SVM_classification_score':[svm_score],'SVM_best_C':[SVM_best_C_parameter], 'SVM_best_gamma':[SVM_best_gamma_parameter]})
-results.to_csv('../NMF/18_08_27_SVMresults')
+results.to_csv('../Results/NMF/18_08_27_SVMresults')
 
 

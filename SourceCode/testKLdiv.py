@@ -12,7 +12,7 @@ PATH_TO_DATA = "../"
 def test_KL_div(ShallowAE_class=SparseShallowAE_KL_sum, sparsity_weights = [1], sparsity_objectives = [0.1], latent_dimension=100, nb_epochs=400, 
                 nb_input_channels=1, one_channel_output=True, add_original_images=True,
                 AMD=False, AMD_step=1, AMD_init_step=1, svm=False, 
-                path_to_dir = "../ShallowAE/"):
+                path_to_dir = "../Results/ShallowAE/"):
     original_images_train, _, original_images_test, y_test = bastien_utils.load_data(PATH_TO_DATA, train=True, test=True, subsetTest=False)
     if (nb_input_channels>1):
         if AMD:

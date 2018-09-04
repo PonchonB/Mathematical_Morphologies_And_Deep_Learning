@@ -4,7 +4,6 @@ SourceCode/__pycache__/
 Logs/
 SourceCode/*.pyc
 Notebooks/.ipynb_checkpoints/
-ShallowAE/
+Results/
 Resources/
 SourceCode/AsymAE_infoGAN/__pycache__/
-AsymAE_infoGAN/

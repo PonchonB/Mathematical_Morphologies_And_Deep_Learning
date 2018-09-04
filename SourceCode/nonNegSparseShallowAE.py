@@ -74,7 +74,7 @@ class Sparse_NonNeg_ShallowAE_KL_AsymDecay(ShallowAE):
         self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
 
     @classmethod
-    def load(cls, model_name, custom_objects={}, path_to_model_directory="../ShallowAE/"):
+    def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/ShallowAE/"):
         """
         Load a autoencoder previously saved with the save method, or a model saved as a h5 file.
         The file is looked for in the directory path_to_model_directory/Sparse_NonNeg/KLdiv_AsymDecay/Models/.
@@ -99,7 +99,7 @@ class Sparse_NonNeg_ShallowAE_KL_AsymDecay(ShallowAE):
         loaded_AE.decay_weight = loaded_AE.encoder.get_config()['layers'][2]['config']['kernel_regularizer']['config']['lam']
         return loaded_AE
 
-    def save(self, path_to_model_directory="../ShallowAE/", model_name=None):
+    def save(self, path_to_model_directory="../Results/ShallowAE/", model_name=None):
         """
         Save the model as a h5 file under the following path: 
                     path_to_model_directory/Sparse_NonNeg/KLdiv_AsymDecay/Models/yy_mm_dd_dim'latent_dim'_KLdiv_'sparsity_weight'_'sparsity_objective'_AsymDecay_'decay_positive_weights'_'devay_negative_weights'_'decay_weight'.h5
@@ -170,7 +170,7 @@ class Sparse_NonNeg_ShallowAE_KL_NonNegConstraint(ShallowAE):
         self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
         
     @classmethod
-    def load(cls, model_name, custom_objects={}, path_to_model_directory="../ShallowAE/"):
+    def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/ShallowAE/"):
         """
         Load a autoencoder previously saved with the save method, or a model saved as a h5 file.
         The file is looked for in the directory path_to_model_directory/Sparse_NonNeg/KLdiv_NonNegConstraint/Models/.
@@ -192,7 +192,7 @@ class Sparse_NonNeg_ShallowAE_KL_NonNegConstraint(ShallowAE):
         loaded_AE.sparsity_objective = loaded_AE.encoder.get_config()['layers'][2]['config']['activity_regularizer']['config']['rho']
         return loaded_AE
 
-    def save(self, path_to_model_directory="../ShallowAE/", model_name=None):
+    def save(self, path_to_model_directory="../Results/ShallowAE/", model_name=None):
         """
         Save the model as a h5 file under the following path: 
                     path_to_model_directory/Sparse_NonNeg/KLdiv_NonNegConstraint/Models/yy_mm_dd_dim'latent_dim'_KLdiv_'sparsity_weight'_'sparsity_objective'_NonNegConstraint.h5
@@ -271,7 +271,7 @@ class Sparse_NonNeg_ShallowAE_L1_AsymDecay(ShallowAE):
         self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
 
     @classmethod
-    def load(cls, model_name, custom_objects={}, path_to_model_directory="../ShallowAE/"):
+    def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/ShallowAE/"):
         """
         Load a autoencoder previously saved with the save method, or a model saved as a h5 file.
         The file is looked for in the directory path_to_model_directory/Sparse_NonNeg/L1_AsymDecay/Models/.
@@ -295,7 +295,7 @@ class Sparse_NonNeg_ShallowAE_L1_AsymDecay(ShallowAE):
         loaded_AE.decay_weight = loaded_AE.encoder.get_config()['layers'][2]['config']['kernel_regularizer']['config']['lam']
         return loaded_AE
 
-    def save(self, path_to_model_directory="../ShallowAE/", model_name=None):
+    def save(self, path_to_model_directory="../Results/ShallowAE/", model_name=None):
         """
         Save the model as a h5 file under the following path: 
                     path_to_model_directory/Sparse_NonNeg/L1_AsymDecay/Models/yy_mm_dd_dim'latent_dim'_L1_'sparsity_weight'_AsymDecay_'decay_positive_weights'_'devay_negative_weights'_'decay_weight'.h5
@@ -362,7 +362,7 @@ class Sparse_NonNeg_ShallowAE_L1_NonNegConstraint(ShallowAE):
         self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
         
     @classmethod
-    def load(cls, model_name, custom_objects={}, path_to_model_directory="../ShallowAE/"):
+    def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/ShallowAE/"):
         """
         Load a autoencoder previously saved with the save method, or a model saved as a h5 file.
         The file is looked for in the directory path_to_model_directory/"Sparse_NonNeg/L1_NonNegConstraint/Models/.
@@ -383,7 +383,7 @@ class Sparse_NonNeg_ShallowAE_L1_NonNegConstraint(ShallowAE):
         loaded_AE.sparsity_weight = loaded_AE.encoder.get_config()['layers'][2]['config']['activity_regularizer']['config']['l1']
         return loaded_AE
 
-    def save(self, path_to_model_directory="../ShallowAE/", model_name=None):
+    def save(self, path_to_model_directory="../Results/ShallowAE/", model_name=None):
         """
         Save the model as a h5 file under the following path: 
                     path_to_model_directory/Sparse_NonNeg/L1_NonNegConstraint/Models/yy_mm_dd_dim'latent_dim'_L1_'sparsity_weight'_NonNeg_Constraint.h5
@@ -469,7 +469,7 @@ class Sparse_NonNeg_ShallowAE_KLsum_AsymDecay(ShallowAE):
         self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
 
     @classmethod
-    def load(cls, model_name, custom_objects={}, path_to_model_directory="../ShallowAE/"):
+def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/ShallowAE/"):
         """
         Load a autoencoder previously saved with the save method, or a model saved as a h5 file.
         The file is looked for in the directory path_to_model_directory/Sparse_NonNeg/KLdivSum_AsymDecay/Models/.
@@ -494,7 +494,7 @@ class Sparse_NonNeg_ShallowAE_KLsum_AsymDecay(ShallowAE):
         loaded_AE.decay_weight = loaded_AE.decoder.get_config()['layers'][1]['config']['kernel_regularizer']['config']['lam']
         return loaded_AE
 
-    def save(self, path_to_model_directory="../ShallowAE/", model_name=None):
+    def save(self, path_to_model_directory="../Results/ShallowAE/", model_name=None):
         """
         Save the model as a h5 file under the following path: 
                     path_to_model_directory/Sparse_NonNeg/KLdivSum_AsymDecay/Models/yy_mm_dd_dim'latent_dim'_KLdivSum_'sparsity_weight'_'sparsity_objective'_AsymDecay_'decay_positive_weights'_'devay_negative_weights'_'decay_weight'.h5
@@ -566,7 +566,7 @@ class Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint(ShallowAE):
         self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
         
     @classmethod
-    def load(cls, model_name, custom_objects={}, path_to_model_directory="../ShallowAE/"):
+    def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/ShallowAE/"):
         """
         Load a autoencoder previously saved with the save method, or a model saved as a h5 file.
         The file is looked for in the directory path_to_model_directory/Sparse_NonNeg/KLdivSum_NonNegConstraint/Models/.
@@ -588,7 +588,7 @@ class Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint(ShallowAE):
         loaded_AE.sparsity_objective = loaded_AE.encoder.get_config()['layers'][2]['config']['activity_regularizer']['config']['rho']
         return loaded_AE
 
-    def save(self, path_to_model_directory="../ShallowAE/", model_name=None):
+    def save(self, path_to_model_directory="../Results/ShallowAE/", model_name=None):
         """
         Save the model as a h5 file under the following path: 
                     path_to_model_directory/Sparse_NonNeg/KLdivSum_NonNegConstraint/Models/yy_mm_dd_dim'latent_dim'_KLdivSum_'sparsity_weight'_'sparsity_objective'_NonNeg_Constraint.h5

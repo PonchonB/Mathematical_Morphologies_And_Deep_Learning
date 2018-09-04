@@ -2,7 +2,7 @@ from __future__ import print_function
 import numpy as np
 from keras.models import Model, load_model
 from keras.layers import Input, Dense, Flatten, Reshape, LeakyReLU, BatchNormalization, Activation, Conv2D
-from keras import losses, regularizers, metrics
+from keras import losses, regularizers
 import keras.utils 
 import h5py
 import math
@@ -62,7 +62,7 @@ class AsymAEinfoGAN:
         self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
         
     @classmethod
-    def load(cls, model_name, custom_objects={}, path_to_model_directory="../AsymAE_infoGAN/"):
+    def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/AsymAE_infoGAN/"):
         """
         Load a autoencoder previously saved with the save method, or a model saved as a h5 file.
         The file is looked for in the directory path_to_model_directory/Simple/Models/.
@@ -140,7 +140,7 @@ class AsymAEinfoGAN:
     def reconstruction(self, X_test):
         return self.autoencoder.predict(X_test)
     
-    def save(self, path_to_model_directory="../AsymAE_infoGAN/", model_name=None):
+    def save(self, path_to_model_directory="../Results/AsymAE_infoGAN/", model_name=None):
         """
         Save the model as a h5 file under the following path: path_to_model_directory/Simmple/Models/yy_mm_dd_dim'latent_dim'.h5
         model_name: String or None, if specified, it is used as a suffix to the previous name.
@@ -202,7 +202,7 @@ class AsymAEinfoGAN:
             total_loss=loss_and_mse
         return total_loss
 
-    def plot_reconstructions(self, X_test, channel_to_plot=0):
+    def plot_reconstructions(self, X_test, channel_to_plot=0, plot_input=True):
         """
         Plots the original images, as well as their reconstructions by the autoencoder.
 
@@ -217,17 +217,22 @@ class AsymAEinfoGAN:
             print('Too big channel number...plotting channel 0 instead...')
             channel_to_plot=0
             X_rec = self.reconstruction(X_test)[:10,:,:,0]
-        plt.figure(figsize=(20, 4))
+        if plot_input:
+            nb_rows_plot=2
+        else:
+            nb_rows_plot=1
+        plt.figure(figsize=(20, 2*nb_rows_plot))
         for i in range(10):
-            # display original
-            ax = plt.subplot(2, 10, i + 1)
-            plt.imshow(X_test[i, :,:, channel_to_plot])
-            plt.gray()
-            ax.get_xaxis().set_visible(False)
-            ax.get_yaxis().set_visible(False)
-
+            if plot_input:
+                # display original
+                ax = plt.subplot(2, 10, i + 1)
+                plt.imshow(X_test[i, :,:, channel_to_plot])
+                plt.gray()
+                ax.get_xaxis().set_visible(False)
+                ax.get_yaxis().set_visible(False)
+    
             # display reconstruction
-            ax = plt.subplot(2, 10, i + 1 + 10)
+            ax = plt.subplot(nb_rows_plot, 10, i + 1 + (nb_rows_plot - 1)*10)
             plt.imshow(X_rec[i,:,:])
             plt.gray()
             ax.get_xaxis().set_visible(False)

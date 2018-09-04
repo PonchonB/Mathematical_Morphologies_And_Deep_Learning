@@ -54,7 +54,7 @@ class ShallowAE:
         self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
         
     @classmethod
-    def load(cls, model_name, custom_objects={}, path_to_model_directory="../ShallowAE/"):
+    def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/ShallowAE/"):
         """
         Load a autoencoder previously saved with the save method, or a model saved as a h5 file.
         The file is looked for in the directory path_to_model_directory/Simple/Models/.
@@ -132,7 +132,7 @@ class ShallowAE:
     def reconstruction(self, X_test):
         return self.autoencoder.predict(X_test)
     
-    def save(self, path_to_model_directory="../ShallowAE/", model_name=None):
+    def save(self, path_to_model_directory="../Results/ShallowAE/", model_name=None):
         """
         Save the model as a h5 file under the following path: path_to_model_directory/Simmple/Models/yy_mm_dd_dim'latent_dim'.h5
         model_name: String or None, if specified, it is used as a suffix to the previous name.

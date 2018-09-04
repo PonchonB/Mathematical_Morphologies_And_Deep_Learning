@@ -63,7 +63,7 @@ class NonNegShallowAE_Asymmetric_decay(ShallowAE):
         self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
 
     @classmethod
-    def load(cls, model_name, custom_objects={}, path_to_model_directory="../ShallowAE/"):
+    def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/ShallowAE/"):
         """
         Load a autoencoder previously saved with the save method, or a model saved as a h5 file.
         The file is looked for in the directory path_to_model_directory/NonNegativity/Asym_Decay/Models/.
@@ -86,7 +86,7 @@ class NonNegShallowAE_Asymmetric_decay(ShallowAE):
         loaded_AE.decay_weight = loaded_AE.encoder.get_config()['layers'][2]['config']['kernel_regularizer']['config']['lam']
         return loaded_AE
 
-    def save(self, path_to_model_directory="../ShallowAE/", model_name=None):
+    def save(self, path_to_model_directory="../Results/ShallowAE/", model_name=None):
         d = datetime.date.today()
         path_to_directory = path_to_model_directory + "NonNegativity/Asym_Decay/Models/"
         strDate = d.strftime("%y_%m_%d")
@@ -140,7 +140,7 @@ class NonNegShallowAE_NonNegConstraint(ShallowAE):
         self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
 
     @classmethod
-    def load(cls, model_name, custom_objects={}, path_to_model_directory="../ShallowAE/"):
+    def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/ShallowAE/"):
         """
         Load a autoencoder previously saved with the save method, or a model saved as a h5 file.
         The file is looked for in the directory path_to_model_directory/NonNegativity/NonNegConstraint/Models/.
@@ -160,7 +160,7 @@ class NonNegShallowAE_NonNegConstraint(ShallowAE):
         loaded_AE.nb_output_channels = loaded_AE.decoder.output_shape[-1]      
         return loaded_AE
 
-    def save(self, path_to_model_directory="../ShallowAE/", model_name=None):
+    def save(self, path_to_model_directory="../Results/ShallowAE/", model_name=None):
         """
         Save the model as a h5 file under the following path: 
                 path_to_model_directory/NonNegativity/NonNegativityConstraint/Models/yy_mm_dd_dim'latent_dim'_NonNegConstraint.h5
