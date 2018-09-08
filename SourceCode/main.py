@@ -125,6 +125,16 @@ sparsity_objectives = [0.01, 0.05, 0.1, 0.2]
 
 ###18_09_06
 ### testing AE with AEinfoGAN, Simple and AMD
-testDims_AsymAE(AsymAE_class=AsymAEinfoGAN, latent_dimensions=[100], nb_epochs=500, nb_input_channels=6, one_channel_output=True,
-            AMD=True, AMD_step=1, AMD_init_step=1, add_original_images=False,
-            svm=True, path_to_dir = "../AsymAE_infoGAN/")
+#testDims_AsymAE(AsymAE_class=AsymAEinfoGAN, latent_dimensions=[100], nb_epochs=500, nb_input_channels=6, one_channel_output=True,
+#            AMD=True, AMD_step=1, AMD_init_step=1, add_original_images=False,
+#            svm=True)
+
+###18_09_07
+### testing AE with AEinfoGAN, Simple, With AMD and Original images
+#testDims_AsymAE(AsymAE_class=AsymAEinfoGAN, latent_dimensions=[100], nb_epochs=500, nb_input_channels=7, one_channel_output=True,
+#            AMD=True, AMD_step=1, AMD_init_step=1, add_original_images=True,
+#            svm=True)
+
+###18_09_08
+test_KL_div(ShallowAE_class=Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint, nb_epochs=500, sparsity_objectives=sparsity_objectives, sparsity_weights=sparsity_weights,
+            latent_dimension=100, nb_input_channels=1, one_channel_output=True, svm=False)
