@@ -11,7 +11,7 @@ import morphoMaths
 PATH_TO_DATA = "../"
 
 def testDims(ShallowAE_class=ShallowAE, latent_dimensions=[100], nb_epochs=400, nb_input_channels=1, one_channel_output=True,
-            AMD=False, AMD_step=1, AMD_init_step=1, add_original_images=True,
+            AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, add_original_images=True,
             svm=False, path_to_dir = "../Results/ShallowAE/", **kwargs):
     original_images_train, _, original_images_test, y_test = bastien_utils.load_data(PATH_TO_DATA, train=True, test=True, subsetTest=False)
     if (nb_input_channels>1):
@@ -26,10 +26,22 @@ def testDims(ShallowAE_class=ShallowAE, latent_dimensions=[100], nb_epochs=400, 
                 path_to_dir=path_to_dir+"/SeveralChannels/WithAMD_NoOriginals/"
             x_train = bastien_utils.rescale_all_channels_between_0_and_1(x_train)
             x_test = bastien_utils.rescale_all_channels_between_0_and_1(x_test)
-        else:        
-            x_train = np.tile(x_train, (1,1,1,nb_input_channels))
-            x_test = np.tile(x_test, (1,1,1,nb_input_channels))
-            path_to_dir=path_to_dir+"/SeveralChannels/NoAMD/"
+        else:
+            if PADO:
+                if (add_original_images & (nb_input_channels>2)):
+                    x_train = morphoMaths.positive_decomposition_by_openings_by_rec(original_images_train[:,:,:,0], levels=nb_input_channels-2, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
+                    x_test = morphoMaths.positive_decomposition_by_openings_by_rec(original_images_test[:,:,:,0], levels=nb_input_channels-2, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
+                    path_to_dir=path_to_dir+"/SeveralChannels/WithPADO/"
+                else:
+                    x_train = morphoMaths.positive_decomposition_by_openings_by_rec(original_images_train[:,:,:,0], levels=nb_input_channels-1, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
+                    x_test = morphoMaths.positive_decomposition_by_openings_by_rec(original_images_test[:,:,:,0], levels=nb_input_channels-1, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
+                    path_to_dir=path_to_dir+"/SeveralChannels/WithPADO_NoOriginals/"
+                x_train = bastien_utils.rescale_all_channels_between_0_and_1(x_train)
+                x_test = bastien_utils.rescale_all_channels_between_0_and_1(x_test)    
+            else:
+                x_train = np.tile(x_train, (1,1,1,nb_input_channels))
+                x_test = np.tile(x_test, (1,1,1,nb_input_channels))
+                path_to_dir=path_to_dir+"/SeveralChannels/NoAMD/"
     else:
         x_train=original_images_train
         x_test=original_images_test

@@ -121,3 +121,31 @@ def AMD_in_one_array(X, levels=4,step=1, init_step=1, add_original_images=True):
     else:
         amd = np.concatenate((R, S.reshape((nb_images, nb_rows, nb_columns, 1))), axis=3)
     return amd 
+
+def opening_by_rec_decomposition(input_im, levels=4,step=1, init_step=1):
+    """
+    Positive decomposition using only openings and no closings.
+    """
+    nb_rows, nb_columns = input_im.shape 
+    R=np.zeros((nb_rows, nb_columns, levels))
+    SE=init_step
+    prev_antiext = np.copy(input_im)
+    for i in range(levels):
+        tmp = OpenbyRec(input_im,SE)
+        R[:,:,i] = np.copy(prev_antiext-tmp)
+        prev_antiext=np.copy(tmp)
+        SE=SE+step
+    S = np.copy(prev_antiext)
+    return R, S
+
+def positive_decomposition_by_openings_by_rec(X, levels=4,step=1, init_step=1, add_original_images=True):
+    nb_images, nb_rows, nb_columns = X.shape
+    S = np.zeros((nb_images, nb_rows, nb_columns))
+    R = np.zeros((nb_images, nb_rows, nb_columns, levels))
+    for i in range(nb_images):
+        R[i],S[i]=opening_by_rec_decomposition(X[i],levels=levels,step=step, init_step=init_step)
+    if add_original_images:
+        res = np.concatenate((X.reshape((nb_images, nb_rows, nb_columns, 1)), R, S.reshape((nb_images, nb_rows, nb_columns, 1))), axis=3)
+    else:
+        res = np.concatenate((R, S.reshape((nb_images, nb_rows, nb_columns, 1))), axis=3)
+    return res 

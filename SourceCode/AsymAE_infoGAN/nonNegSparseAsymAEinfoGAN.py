@@ -629,8 +629,8 @@ class Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint(AsymAEinfoGAN):
         loaded_AE.nb_output_channels = loaded_AE.decoder.output_shape[-1]
         loaded_AE.nb_rows = loaded_AE.encoder.input_shape[1]
         loaded_AE.nb_columns = loaded_AE.encoder.input_shape[2]
-        loaded_AE.sparsity_weight = loaded_AE.encoder.get_config()['layers'][1]['config']['activity_regularizer']['config']['beta']
-        loaded_AE.sparsity_objective = loaded_AE.encoder.get_config()['layers'][1]['config']['activity_regularizer']['config']['rho']
+        loaded_AE.sparsity_weight = loaded_AE.encoder.get_config()['layers'][-1]['config']['activity_regularizer']['config']['beta']
+        loaded_AE.sparsity_objective = loaded_AE.encoder.get_config()['layers'][-1]['config']['activity_regularizer']['config']['rho']
         return loaded_AE
 
     def save(self, path_to_model_directory="../Results/AsymAE_infoGAN/", model_name=None):
