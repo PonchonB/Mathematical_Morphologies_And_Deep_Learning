@@ -437,16 +437,20 @@ class AsymAEinfoGAN:
         sigma = (sqrt - (np.linalg.norm(H, ord=1, axis=1)/(np.linalg.norm(H, ord=2, axis=1)+0.0000001)))/(sqrt - 1)
         return np.mean(sigma)
 
-    def plot_histograms_of_the_encoding(self, X):
+    def plot_histograms_of_the_encoding(self, X, save=False, figure_name = 'asymAE_simple_hist.eps', 
+                                        path_to_save='../Livrables/28_09_01_Rapport/Figures/Results/AsymAE/'):
         """
         Plots the histogram of the encoding of each of the images in X (nb_samples, nb_rows, nb_columns, nb_channels)
         """
         H = self.encode(X)
-        plt.figure(figsize=(30, 4))
+        fig, ax = plt.subplots(1, 10, figsize=(30, 4))
         for i in range(10):
-            ax = plt.subplot(1, 10, i + 1)
-            ax.hist(H[i], bins=self.latent_dim)
+            ax[i].hist(H[i], bins=self.latent_dim)
+        if save:
+            full_path=path_to_save+figure_name
+            fig.savefig(full_path, format='eps')
         plt.show()
+
 
     def plot_histograms_of_the_decoder_atoms(self):
         """

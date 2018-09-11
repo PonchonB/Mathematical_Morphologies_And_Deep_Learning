@@ -69,10 +69,10 @@ def testDims_AsymAE(AsymAE_class=AsymAEinfoGAN, latent_dimensions=[100], nb_epoc
         test_rec_errors[idx] = shAE.reconstruction_error(x_test, X_rec_th=original_images_test)
         sparsity_train[idx] = shAE.sparsity_measure(x_train)
         sparsity_test[idx] = shAE.sparsity_measure(x_test)
-        max_approx_train = shAE.max_approximation_error(x_train, morphoMaths.dilatation, original_images=original_images_train, apply_to_bias=True, SE_scale=1)
+        max_approx_train = shAE.max_approximation_error(x_train, morphoMaths.dilatation, original_images=original_images_train, apply_to_bias=False, SE_scale=1)
         max_approx_error_toOriginal_train[idx] = max_approx_train[0]
         max_approx_error_toRec_train[idx] = max_approx_train[1]
-        max_approx_test = shAE.max_approximation_error(x_test, morphoMaths.dilatation, original_images=original_images_test, apply_to_bias=True, SE_scale=1)
+        max_approx_test = shAE.max_approximation_error(x_test, morphoMaths.dilatation, original_images=original_images_test, apply_to_bias=False, SE_scale=1)
         max_approx_error_toOriginal_test[idx] = max_approx_test[0]
         max_approx_error_toRec_test[idx] = max_approx_test[1]
         np.save(out_path +'_training_errors_' + strDims, train_rec_errors)

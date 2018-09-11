@@ -213,7 +213,7 @@ class ShallowAE:
             nb_rows_plot=2
         else:
             nb_rows_plot=1
-        fig=plt.figure(figsize=(20, 2*nb_rows_plot))
+        plt.figure(figsize=(20, 2*nb_rows_plot))
         for i in range(10):
             if plot_input:
                 # display original

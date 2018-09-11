@@ -86,10 +86,10 @@ def test_KL_div(ShallowAE_class=SparseShallowAE_KL_sum, sparsity_weights = [1], 
             test_kl_loss[idx1, idx2] = shAE.total_loss(x_test, X_rec_th=original_images_test) - test_rec_errors[idx1, idx2] 
             sparsity_train[idx1, idx2] = shAE.sparsity_measure(x_train)
             sparsity_test[idx1, idx2] = shAE.sparsity_measure(x_test)
-            max_approx_train = shAE.max_approximation_error(x_train, morphoMaths.dilatation, original_images=original_images_train, apply_to_bias=True, SE_scale=1)
+            max_approx_train = shAE.max_approximation_error(x_train, morphoMaths.dilatation, original_images=original_images_train, apply_to_bias=False, SE_scale=1)
             max_approx_error_toOriginal_train[idx1, idx2] = max_approx_train[0]
             max_approx_error_toRec_train[idx1, idx2] = max_approx_train[1]
-            max_approx_test = shAE.max_approximation_error(x_test, morphoMaths.dilatation, original_images=original_images_test, apply_to_bias=True, SE_scale=1)
+            max_approx_test = shAE.max_approximation_error(x_test, morphoMaths.dilatation, original_images=original_images_test, apply_to_bias=False, SE_scale=1)
             max_approx_error_toOriginal_test[idx1, idx2] = max_approx_test[0]
             max_approx_error_toRec_test[idx1, idx2] = max_approx_test[1]
             np.save(out_path +'_training_errors_' + strDims, train_rec_errors)
