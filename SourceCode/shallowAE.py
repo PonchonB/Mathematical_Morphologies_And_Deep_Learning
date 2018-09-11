@@ -370,8 +370,7 @@ class ShallowAE:
         A value larger than 100 (max_log_C=2) usually leads to poor classification performance.
         On the opposite the smaller gamma, the more points are considered in the 'neighborhood' of each specific point.
         """
-        H = self.encode(X)
-        H_train, H_test, Y_train, Y_test = train_test_split(H, y, test_size=0.2, stratify=y)
+        H_train, H_test, Y_train, Y_test = train_test_split(self.encode(X), y, test_size=0.2, stratify=y)
         C_range = np.logspace(min_log_C, max_log_C, nb_values_C)
         param_grid = dict(C=C_range)
         cv = StratifiedShuffleSplit(n_splits=15, test_size=0.08, random_state=42)
