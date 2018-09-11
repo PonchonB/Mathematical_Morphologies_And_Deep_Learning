@@ -194,7 +194,7 @@ class ShallowAE:
             total_loss=loss_and_mse
         return total_loss
 
-    def plot_reconstructions(self, X_test, channel_to_plot=0):
+    def plot_reconstructions(self, X_test, channel_to_plot=0, plot_input=True, save=False):
         """
         Plots the original images, as well as their reconstructions by the autoencoder.
 
@@ -209,17 +209,22 @@ class ShallowAE:
             print('Too big channel number...plotting channel 0 instead...')
             channel_to_plot=0
             X_rec = self.reconstruction(X_test)[:10,:,:,0]
-        plt.figure(figsize=(20, 4))
+        if plot_input:
+            nb_rows_plot=2
+        else:
+            nb_rows_plot=1
+        fig=plt.figure(figsize=(20, 2*nb_rows_plot))
         for i in range(10):
-            # display original
-            ax = plt.subplot(2, 10, i + 1)
-            plt.imshow(X_test[i, :,:, channel_to_plot])
-            plt.gray()
-            ax.get_xaxis().set_visible(False)
-            ax.get_yaxis().set_visible(False)
-
+            if plot_input:
+                # display original
+                ax = plt.subplot(2, 10, i + 1)
+                plt.imshow(X_test[i, :,:, channel_to_plot])
+                plt.gray()
+                ax.get_xaxis().set_visible(False)
+                ax.get_yaxis().set_visible(False)
+    
             # display reconstruction
-            ax = plt.subplot(2, 10, i + 1 + 10)
+            ax = plt.subplot(nb_rows_plot, 10, i + 1 + (nb_rows_plot - 1)*10)
             plt.imshow(X_rec[i,:,:])
             plt.gray()
             ax.get_xaxis().set_visible(False)
@@ -346,6 +351,46 @@ class ShallowAE:
         grid = GridSearchCV(svm.SVC(cache_size=600), param_grid=param_grid, cv=cv, verbose=2)
         grid.fit(H_train, Y_train)
         return grid.score(H_test, Y_test), grid.best_params_
+
+    def best_linearSVM_classification_score(self, X, y, min_log_C=-2, max_log_C=3, nb_values_C=10):
+        """
+        Performs cross-validation and parameter seletion (grid search on the specified parameter) 
+            and returns the best classification score using a SVM classifier with a Linear kernel, assumed to be sufficient when the number of features is large.
+        Returns also the best C on the grid search, as a dictionary (with only one element).
+        Arguments:
+            X: numpy array (nb_samples, nb_rows, nb_columns, nb_input_channels) to be encoded on whose code will be use for the classification
+            y: numpy array (nb_sampls,). Labels of each image for the classification.
+            min_log_C: int. Minimal value of the C parameter of the SVM classifier (margin) to be tested in log_10 scale.
+            max_log_C: int.  Maximal value of the C parameter of the SVM classifier (margin) to be tested in log_10 scale.
+            nb_values_C: int. Number of values of the C parameter of the SVM classifier (margin) to be tested in log_10 scale.
+            min_log_gamma: int. Minimal value of the gamma parameter of the SVM classifier (free parameter) to be tested in log_10 scale.
+            max_log_gamma: int.  Maximal value of the C parameter of the SVM classifier (free paramter) to be tested in log_10 scale.
+            nb_values_gamma: int. Number of values of the C parameter of the SVM classifier (free paramter) to be tested in log_10 scale.
+        Note that the larger gamma is, the smaller the distance between two points must be for the kernel value to be close to 1.
+        A value larger than 100 (max_log_C=2) usually leads to poor classification performance.
+        On the opposite the smaller gamma, the more points are considered in the 'neighborhood' of each specific point.
+        """
+        H = self.encode(X)
+        H_train, H_test, Y_train, Y_test = train_test_split(H, y, test_size=0.2, stratify=y)
+        C_range = np.logspace(min_log_C, max_log_C, nb_values_C)
+        param_grid = dict(C=C_range)
+        cv = StratifiedShuffleSplit(n_splits=15, test_size=0.08, random_state=42)
+        grid = GridSearchCV(svm.LinearSVC(dual=False), param_grid=param_grid, cv=cv, verbose=2, refit=False)
+        grid.fit(H_train, Y_train)
+        scores = np.zeros(25)
+        cv = StratifiedShuffleSplit(n_splits=25, test_size=0.05)
+        i=0
+        for train_index, test_index in cv.split(H_test, Y_test):
+            H_test_train = H_test[train_index]
+            Y_test_train = Y_test[train_index]
+            H_test_test = H_test[test_index]
+            Y_test_test = Y_test[test_index]
+            linearSVM = svm.LinearSVC(dual=False, **grid.best_params_)
+            linearSVM.fit(H_test_train, Y_test_train)
+            scores[i] = linearSVM.score(H_test_test, Y_test_test)
+            i=i+1
+        return np.mean(scores), np.std(scores), grid.best_params_
+
 
     def svm_classifiation_score(self, X, y, C=1.0, kernel='rbf', gamma='auto', degree=3):
         """
