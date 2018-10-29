@@ -71,7 +71,7 @@ class Sparse_NonNeg_ShallowAE_Hoyer_NonNegConstraint(ShallowAE):
         path_to_directory = path_to_model_directory + "Sparse_NonNeg/Hoyer_NonNegConstraint/Models/"
         model_path = path_to_directory + model_name
         loaded_AE = cls()
-        loaded_AE.autoencoder = load_model(model_path, custom_objects=dict({'KL_divergence':custom_regularizers.KL_divergence}, **custom_objects))
+        loaded_AE.autoencoder = load_model(model_path, custom_objects=dict({'sparsity_Hoyer':custom_regularizers.sparsity_Hoyer}, **custom_objects))
         loaded_AE.encoder = loaded_AE.autoencoder.layers[1]
         loaded_AE.decoder = loaded_AE.autoencoder.layers[2]
         loaded_AE.latent_dim = loaded_AE.encoder.output_shape[1]        
