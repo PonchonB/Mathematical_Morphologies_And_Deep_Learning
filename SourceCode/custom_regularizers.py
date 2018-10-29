@@ -65,7 +65,7 @@ class L1(Regularizer):
     def get_config(self):
         return {'beta': float(self.beta)}
         
-class sparseness(Regularizer):
+class sparsity_Hoyer(Regularizer):
     """
     Using the sparseness measure from Hoyer 2004 (Sparse-NMF) to enforce sparsity.
     # Arguments
