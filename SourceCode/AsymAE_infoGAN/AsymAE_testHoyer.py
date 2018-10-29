@@ -1,17 +1,16 @@
 import numpy as np
 import bastien_utils
-from shallowAE import ShallowAE
-from nonNegSparseShallowAE import Sparse_NonNeg_ShallowAE_Hoyer_NonNegConstraint
+from AsymAE_infoGAN.nonNegSparseAsymAEinfoGAN import Sparse_NonNeg_AsymAEinfoGAN_Hoyer_NonNegConstraint
 import datetime
 import pandas as pd
 import morphoMaths
 
 PATH_TO_DATA = "../"
 
-def test_Hoyer_sparsity(ShallowAE_class=Sparse_NonNeg_ShallowAE_Hoyer_NonNegConstraint, sparsity_weights = [1], sparsity_objectives = [0.6], latent_dimension=100, nb_epochs=500, 
+def test_Hoyer_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_Hoyer_NonNegConstraint, sparsity_weights = [1], sparsity_objectives = [0.6], latent_dimension=100, nb_epochs=500, 
                 nb_input_channels=1, one_channel_output=True, add_original_images=True,
-                AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, svm=False, 
-                path_to_dir = "../Results/ShallowAE/"):
+                AMD=False, PADO=True, AMD_step=1, AMD_init_step=1, svm=False, 
+                path_to_dir = "../Results/AsymAE_infoGAN/"):
     original_images_train, _, original_images_test, y_test = bastien_utils.load_data(PATH_TO_DATA, train=True, test=True, subsetTest=False)
     if (nb_input_channels>1):
         if AMD:
@@ -69,7 +68,7 @@ def test_Hoyer_sparsity(ShallowAE_class=Sparse_NonNeg_ShallowAE_Hoyer_NonNegCons
         SVM_classification_accuracy = np.zeros((nb_sparsity_weights, nb_sparsity_objectives))
     for idx1, sp_w in enumerate(sparsity_weights):
         for idx2, sp_o in enumerate(sparsity_objectives):
-            shAE = ShallowAE_class(latent_dim=latent_dimension, sparsity_weight=sp_w, sparsity_objective=sp_o, 
+            shAE = AsymAE_class(latent_dim=latent_dimension, sparsity_weight=sp_w, sparsity_objective=sp_o, 
                                     nb_input_channels=nb_input_channels, one_channel_output=one_channel_output)
             shAE.train(X_train=x_train, X_train_expected_output=original_images_train, nb_epochs=nb_epochs, 
                         X_val=(x_test, original_images_test), verbose=2)
