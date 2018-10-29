@@ -203,7 +203,14 @@ sparsity_objectives = [0.01, 0.05, 0.1, 0.2]
 
 ###18_10_29
 ###ShallowAE with Sparsity Hoyer regularizer for the constraint
-test_Hoyer_sparsity(ShallowAE_class=Sparse_NonNeg_ShallowAE_Hoyer_NonNegConstraint, sparsity_weights = [0.1, 0.5, 1, 5], sparsity_objectives = [0.6], latent_dimension=100, nb_epochs=500, 
+#test_Hoyer_sparsity(ShallowAE_class=Sparse_NonNeg_ShallowAE_Hoyer_NonNegConstraint, sparsity_weights = [0.1, 0.5, 1, 5], sparsity_objectives = [0.6], latent_dimension=100, nb_epochs=500, 
+#                nb_input_channels=1, one_channel_output=True, add_original_images=True,
+#                AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, svm=False, 
+#                path_to_dir = "../Results/ShallowAE/")
+
+###18_10_29
+###ShallowAE with Sparsity Hoyer regularizer for the constraint
+test_Hoyer_sparsity(ShallowAE_class=Sparse_NonNeg_ShallowAE_Hoyer_NonNegConstraint, sparsity_weights = [0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1], sparsity_objectives = [0.6], latent_dimension=100, nb_epochs=500, 
                 nb_input_channels=1, one_channel_output=True, add_original_images=True,
                 AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, svm=False, 
                 path_to_dir = "../Results/ShallowAE/")
