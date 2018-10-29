@@ -8,7 +8,7 @@ import morphoMaths
 
 PATH_TO_DATA = "../"
 
-def test_KL_div(ShallowAE_class=Sparse_NonNeg_ShallowAE_Hoyer_NonNegConstraint, sparsity_weights = [1], sparsity_objectives = [0.6], latent_dimension=100, nb_epochs=500, 
+def test_Hoyer_sparsity(ShallowAE_class=Sparse_NonNeg_ShallowAE_Hoyer_NonNegConstraint, sparsity_weights = [1], sparsity_objectives = [0.6], latent_dimension=100, nb_epochs=500, 
                 nb_input_channels=1, one_channel_output=True, add_original_images=True,
                 AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, svm=False, 
                 path_to_dir = "../Results/ShallowAE/"):
