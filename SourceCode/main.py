@@ -159,3 +159,4 @@ testDims(ShallowAE_class=ShallowAE, latent_dimensions=[100], nb_epochs=500, nb_i
             AMD=False, PADO=True, AMD_step=1, AMD_init_step=1, add_original_images=True,
             svm=False)
 
+##### Correcting the max approximation error computations (no longer applying the dilatation to bias) in the four test functions
