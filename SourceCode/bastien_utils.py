@@ -76,20 +76,32 @@ def apply_operator_to_all_images(operator, X, **kwargs):
             result[i,:,:,j]= operator(X[i, :,:,j], **kwargs)
     return result
 
-def plot_all_images(X, channel_to_plot=0):
+def plot_all_images(X, channel_to_plot=0, relative_intensity=True):
     nb_samples, _, _, nb_channels =X.shape
     if (channel_to_plot >= nb_channels):
         print('Too big channel number...plotting channel 0 instead...')
         channel_to_plot=0
+    if relative_intensity==True:
+        external_values={}
+    else:
+        external_values={'vmin':0, 'vmax':1}
     n_columns = min(10, nb_samples)
     n_rows = int(nb_samples/10) +1   
     plt.figure(figsize=(n_columns*2,n_rows*2))
     for i in range(nb_samples):
         ax = plt.subplot(n_rows, n_columns, i + 1)
-        plt.imshow(X[i,:,:,channel_to_plot])
+        plt.imshow(X[i,:,:,channel_to_plot], **external_values)
         plt.gray()
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
+    plt.show()
+
+def plot_histograms_of_values_by_channel(X):
+    _,_,_,nb_channels = X.shape
+    f, axarr = plt.subplots(nb_channels, sharex=True, sharey=True, figsize=(10,nb_channels*2))
+    for i in range(nb_channels):
+        axarr[i].hist(X[:,:,:,i].flatten(), bins=20)
+        axarr[i].set_title('Channel: ' + str(i))
     plt.show()
 
 def rescale_all_channels_between_0_and_1(X):
