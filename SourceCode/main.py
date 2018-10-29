@@ -155,8 +155,48 @@ sparsity_objectives = [0.01, 0.05, 0.1, 0.2]
 
 ###18_09_11
 ###Simple shallowAE with PADO and originals
-testDims(ShallowAE_class=ShallowAE, latent_dimensions=[100], nb_epochs=500, nb_input_channels=7, one_channel_output=True,
-            AMD=False, PADO=True, AMD_step=1, AMD_init_step=1, add_original_images=True,
-            svm=False)
+#testDims(ShallowAE_class=ShallowAE, latent_dimensions=[100], nb_epochs=500, nb_input_channels=7, one_channel_output=True,
+#            AMD=False, PADO=True, AMD_step=1, AMD_init_step=1, add_original_images=True,
+#            svm=False)
 
 ##### Correcting the max approximation error computations (no longer applying the dilatation to bias) in the four test functions
+
+
+###18_09_11
+### AsymAE Sparse NonNeg with PADO without originals
+#test_KL_div_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint, sparsity_weights = sparsity_weights, sparsity_objectives = sparsity_objectives, latent_dimension=100, nb_epochs=500,
+#                nb_input_channels=6, one_channel_output=True, add_original_images=False,
+#                AMD=False, PADO=True, AMD_step=1, AMD_init_step=1, svm=False, 
+#                path_to_dir = "../Results/AsymAE_infoGAN/")
+
+###18_09_12
+### testing asymAE with AEinfoGAN, Simple, With PADO and noOriginal images
+#testDims_AsymAE(AsymAE_class=AsymAEinfoGAN, latent_dimensions=[100], nb_epochs=500, nb_input_channels=6, one_channel_output=True,
+#            AMD=False, PADO=True, AMD_step=1, AMD_init_step=1, add_original_images=False,
+#            svm=False)
+
+###18_09_24
+#testDims_AsymAE(AsymAE_class=AsymAEinfoGAN, latent_dimensions=[100], nb_epochs=500, nb_input_channels=7, one_channel_output=True,
+#            AMD=False, PADO=True, AMD_step=1, AMD_init_step=1, add_original_images=True,
+#            svm=False)
+
+###18_09_26
+#test_KL_div_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint, sparsity_weights = sparsity_weights, sparsity_objectives = sparsity_objectives, latent_dimension=100, nb_epochs=500,
+#                nb_input_channels=7, one_channel_output=True, add_original_images=True,
+#                AMD=False, PADO=True, AMD_step=1, AMD_init_step=1, svm=False, 
+#                path_to_dir = "../Results/AsymAE_infoGAN/")
+
+###18_10_16
+###Asym AE with Sparse and NonNeg Constraint with AMD and original images 
+#test_KL_div_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint, sparsity_weights = sparsity_weights, sparsity_objectives = sparsity_objectives, latent_dimension=100, nb_epochs=500,
+#                nb_input_channels=7, one_channel_output=True, add_original_images=True,
+#                AMD=True, PADO=False, AMD_step=1, AMD_init_step=1, svm=False,
+#                path_to_dir = "../Results/AsymAE_infoGAN/")
+
+###18_10_25
+###Asym AE with Sparse and NonNeg Constraint with AMD without original images
+test_KL_div_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint, sparsity_weights = sparsity_weights, sparsity_objectives = sparsity_objectives, latent_dimension=100, nb_epochs=500,
+                nb_input_channels=6, one_channel_output=True, add_original_images=False,
+                AMD=True, PADO=False, AMD_step=1, AMD_init_step=1, svm=False,
+                path_to_dir = "../Results/AsymAE_infoGAN/")
+
