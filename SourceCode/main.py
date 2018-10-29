@@ -1,9 +1,10 @@
 import numpy as np
 from nonNegShallowAE import NonNegShallowAE_NonNegConstraint
 from sparseShallowAE import SparseShallowAE_KL_sum
-from nonNegSparseShallowAE import Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint, Sparse_NonNeg_ShallowAE_KLsum_AsymDecay
+from nonNegSparseShallowAE import Sparse_NonNeg_ShallowAE_KLsum_NonNegConstraint, Sparse_NonNeg_ShallowAE_KLsum_AsymDecay, Sparse_NonNeg_ShallowAE_Hoyer_NonNegConstraint
 from shallowAE import ShallowAE
 from testKLdiv import test_KL_div
+from testSparsityHoyer import test_Hoyer_sparsity
 from testAE import testDims
 import keras
 from AsymAE_infoGAN.testAsymAE import testDims_AsymAE
@@ -195,8 +196,21 @@ sparsity_objectives = [0.01, 0.05, 0.1, 0.2]
 
 ###18_10_25
 ###Asym AE with Sparse and NonNeg Constraint with AMD without original images
-test_KL_div_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint, sparsity_weights = sparsity_weights, sparsity_objectives = sparsity_objectives, latent_dimension=100, nb_epochs=500,
-                nb_input_channels=6, one_channel_output=True, add_original_images=False,
-                AMD=True, PADO=False, AMD_step=1, AMD_init_step=1, svm=False,
-                path_to_dir = "../Results/AsymAE_infoGAN/")
+#test_KL_div_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint, sparsity_weights = sparsity_weights, sparsity_objectives = sparsity_objectives, latent_dimension=100, nb_epochs=500,
+#                nb_input_channels=6, one_channel_output=True, add_original_images=False,
+#                AMD=True, PADO=False, AMD_step=1, AMD_init_step=1, svm=False,
+#                path_to_dir = "../Results/AsymAE_infoGAN/")
 
+###18_10_29
+###ShallowAE with Sparsity Hoyer regularizer for the constraint
+#test_Hoyer_sparsity(ShallowAE_class=Sparse_NonNeg_ShallowAE_Hoyer_NonNegConstraint, sparsity_weights = [0.1, 0.5, 1, 5], sparsity_objectives = [0.6], latent_dimension=100, nb_epochs=500, 
+#                nb_input_channels=1, one_channel_output=True, add_original_images=True,
+#                AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, svm=False, 
+#                path_to_dir = "../Results/ShallowAE/")
+
+###18_10_29
+###ShallowAE with Sparsity Hoyer regularizer for the constraint
+test_Hoyer_sparsity(ShallowAE_class=Sparse_NonNeg_ShallowAE_Hoyer_NonNegConstraint, sparsity_weights = [0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1], sparsity_objectives = [0.6], latent_dimension=100, nb_epochs=500, 
+                nb_input_channels=1, one_channel_output=True, add_original_images=True,
+                AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, svm=False, 
+                path_to_dir = "../Results/ShallowAE/")
