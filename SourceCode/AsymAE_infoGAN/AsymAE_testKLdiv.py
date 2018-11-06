@@ -11,18 +11,24 @@ PATH_TO_DATA = "../"
 def test_KL_div_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint, sparsity_weights = [1], sparsity_objectives = [0.1], latent_dimension=100, nb_epochs=500, 
                 nb_input_channels=1, one_channel_output=True, add_original_images=True,
                 AMD=False, PADO=True, AMD_step=1, AMD_init_step=1, svm=False, 
-                path_to_dir = "../Results/AsymAE_infoGAN/"):
-    original_images_train, _, original_images_test, y_test = bastien_utils.load_data(PATH_TO_DATA, train=True, test=True, subsetTest=False)
+                path_to_dir = "../Results", dataset_fashion_MNIST=True):
+    if dataset_fashion_MNIST:
+        original_images_train, _, original_images_test, y_test = bastien_utils.load_data_fashionMNIST(PATH_TO_DATA, train=True, test=True, subsetTest=False)
+        path_to_dir = path_to_dir + "/fashion_MNIST"
+    else:
+        original_images_train, _, original_images_test, y_test = bastien_utils.load_data_MNIST(train=True, test=True, subsetTest=False)        
+        path_to_dir = path_to_dir + "/MNIST"
+    path_to_dir = path_to_dir + "/AsymAE_infoGAN"
     if (nb_input_channels>1):
         if AMD:
             if (add_original_images & (nb_input_channels>2)):
                 x_train = morphoMaths.AMD_in_one_array(original_images_train[:,:,:,0], levels=nb_input_channels-2, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
                 x_test = morphoMaths.AMD_in_one_array(original_images_test[:,:,:,0], levels=nb_input_channels-2, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
-                path_to_dir=path_to_dir+"/SeveralChannels/WithAMD/"
+                path_to_dir=path_to_dir+"/SeveralChannels/WithAMD"
             else:
                 x_train = morphoMaths.AMD_in_one_array(original_images_train[:,:,:,0], levels=nb_input_channels-1, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
                 x_test = morphoMaths.AMD_in_one_array(original_images_test[:,:,:,0], levels=nb_input_channels-1, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
-                path_to_dir=path_to_dir+"/SeveralChannels/WithAMD_NoOriginals/"
+                path_to_dir=path_to_dir+"/SeveralChannels/WithAMD_NoOriginals"
             x_train = bastien_utils.rescale_all_channels_between_0_and_1(x_train)
             x_test = bastien_utils.rescale_all_channels_between_0_and_1(x_test)
         else:
@@ -30,17 +36,17 @@ def test_KL_div_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegCon
                 if (add_original_images & (nb_input_channels>2)):
                     x_train = morphoMaths.positive_decomposition_by_openings_by_rec(original_images_train[:,:,:,0], levels=nb_input_channels-2, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
                     x_test = morphoMaths.positive_decomposition_by_openings_by_rec(original_images_test[:,:,:,0], levels=nb_input_channels-2, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
-                    path_to_dir=path_to_dir+"/SeveralChannels/WithPADO/"
+                    path_to_dir=path_to_dir+"/SeveralChannels/WithPADO"
                 else:
                     x_train = morphoMaths.positive_decomposition_by_openings_by_rec(original_images_train[:,:,:,0], levels=nb_input_channels-1, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
                     x_test = morphoMaths.positive_decomposition_by_openings_by_rec(original_images_test[:,:,:,0], levels=nb_input_channels-1, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
-                    path_to_dir=path_to_dir+"/SeveralChannels/WithPADO_NoOriginals/"
+                    path_to_dir=path_to_dir+"/SeveralChannels/WithPADO_NoOriginals"
                 x_train = bastien_utils.rescale_all_channels_between_0_and_1(x_train)
                 x_test = bastien_utils.rescale_all_channels_between_0_and_1(x_test)    
             else:
                 x_train = np.tile(x_train, (1,1,1,nb_input_channels))
                 x_test = np.tile(x_test, (1,1,1,nb_input_channels))
-                path_to_dir=path_to_dir+"/SeveralChannels/NoAMD/"
+                path_to_dir=path_to_dir+"/SeveralChannels/NoAMD"
     else:
         x_train=original_images_train
         x_test=original_images_test
