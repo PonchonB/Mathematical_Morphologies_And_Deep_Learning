@@ -10,12 +10,13 @@ from matplotlib import offsetbox
 from sklearn.svm import SVC
 from sklearn.model_selection import KFold
 from skimage import exposure
+from keras.datasets import mnist
 
 import sys
 sys.path.append('../fashion_mnist')
 from utils import mnist_reader
 
-def load_data(filePath, train=True, test=True, subsetTest=False, subsetSize=10):
+def load_data_fashionMNIST(filePath, train=True, test=True, subsetTest=False, subsetSize=10):
     """
     Load the FashionMNIST data set. 
     filePath is the path to the parent directory of the fashion_mnist local repository.
@@ -48,6 +49,51 @@ def load_data(filePath, train=True, test=True, subsetTest=False, subsetSize=10):
         ret.append(y_test_small)
     return ret
 
+def load_data_MNIST(train=True, test=True, subsetTest=False, subsetSize=10):
+    """
+    Load the MNIST data set. 
+    filePath is the path to the parent directory of the fashion_mnist local repository.
+    If train=True, returns the training set (x_train and y_train two first items in the list).
+    If test=True, returns the full test set (x_test and y_test two last items in the list). 
+    If test=False, returns a small subset of the test set, of size subsetSize and with a balance number of images from each class (one from each with  subsetSize = 10)
+    """
+    ret=[]    
+    if train:
+        (x_train, y_train), (x_test, y_test) = mnist.load_data()
+        x_train = np.reshape(x_train, (len(x_train), 28, 28, 1))  # adapt this if using `channels_first` image data format
+        ret.append(x_train)
+        ret.append(y_train)
+        x_test = np.reshape(x_test, (len(x_test), 28, 28, 1))  # adapt this if using `channels_first` image data format
+        if test:
+            ret.append(x_test)
+            ret.append(y_test)
+        if subsetTest:
+            x_test_small = np.zeros((subsetSize, 28,28,1))
+            y_test_small = np.zeros(subsetSize)
+            c_len = [x_test[y_test==j].shape[0] for j in range(10)]
+            for i in range(subsetSize):
+                c=i%10
+                x_test_small[i, :,:,:]=np.copy(x_test[y_test==c][np.random.randint(c_len[c])])
+                y_test_small[i] = c
+            ret.append(x_test_small)
+            ret.append(y_test_small)
+    else:
+        (_, _), (x_test, y_test) = mnist.load_data()
+        x_test = np.reshape(x_test, (len(x_test), 28, 28, 1))  # adapt this if using `channels_first` image data format
+        if test:
+            ret.append(x_test)
+            ret.append(y_test)
+        if subsetTest:
+            x_test_small = np.zeros((subsetSize, 28,28,1))
+            y_test_small = np.zeros(subsetSize)
+            c_len = [x_test[y_test==j].shape[0] for j in range(10)]
+            for i in range(subsetSize):
+                c=i%10
+                x_test_small[i, :,:,:]=np.copy(x_test[y_test==c][np.random.randint(c_len[c])])
+                y_test_small[i] = c
+            ret.append(x_test_small)
+            ret.append(y_test_small)
+    return ret
 
 def plot_embedding(X, title=None):
     x_min, x_max = np.min(X, 0), np.max(X, 0)
