@@ -9,8 +9,11 @@ from testAE import testDims
 import keras
 from AsymAE_infoGAN.testAsymAE import testDims_AsymAE
 from AsymAE_infoGAN.AsymAE_testKLdiv import test_KL_div_Asym_AE
-from AsymAE_infoGAN.nonNegSparseAsymAEinfoGAN import Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint
+from AsymAE_infoGAN.nonNegSparseAsymAEinfoGAN import Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint, Sparse_NonNeg_AsymAEinfoGAN_Hoyer_NonNegConstraint
+
 from AsymAE_infoGAN.AsymAE_infoGAN import AsymAEinfoGAN
+from AsymAE_infoGAN.AsymAE_testHoyer import test_Hoyer_Asym_AE
+
 
 print("Keras version: ", keras.__version__)
 #dims = [1, 5, 10, 20, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 784]
@@ -210,7 +213,14 @@ sparsity_objectives = [0.01, 0.05, 0.1, 0.2]
 
 ###18_10_29
 ###ShallowAE with Sparsity Hoyer regularizer for the constraint
-test_Hoyer_sparsity(ShallowAE_class=Sparse_NonNeg_ShallowAE_Hoyer_NonNegConstraint, sparsity_weights = [0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1], sparsity_objectives = [0.6], latent_dimension=100, nb_epochs=500, 
+#test_Hoyer_sparsity(ShallowAE_class=Sparse_NonNeg_ShallowAE_Hoyer_NonNegConstraint, sparsity_weights = [0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1], sparsity_objectives = [0.6], latent_dimension=100, nb_epochs=500, 
+#                nb_input_channels=1, one_channel_output=True, add_original_images=True,
+#                AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, svm=False, 
+#                path_to_dir = "../Results/ShallowAE/")
+
+###18_10_30
+###AsymAE_infoGAN with Hoyer sparsity regularizer
+test_Hoyer_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_Hoyer_NonNegConstraint, sparsity_weights = [0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1], sparsity_objectives = [0.6], latent_dimension=100, nb_epochs=500, 
                 nb_input_channels=1, one_channel_output=True, add_original_images=True,
                 AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, svm=False, 
-                path_to_dir = "../Results/ShallowAE/")
+                path_to_dir = "../Results/AsymAE_infoGAN/")
