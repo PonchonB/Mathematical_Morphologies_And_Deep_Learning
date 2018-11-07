@@ -220,7 +220,18 @@ sparsity_objectives = [0.01, 0.05, 0.1, 0.2]
 
 ###18_10_30
 ###AsymAE_infoGAN with Hoyer sparsity regularizer
-test_Hoyer_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_Hoyer_NonNegConstraint, sparsity_weights = [0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1], sparsity_objectives = [0.6], latent_dimension=100, nb_epochs=500, 
-                nb_input_channels=1, one_channel_output=True, add_original_images=True,
-                AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, svm=False, 
-                path_to_dir = "../Results/AsymAE_infoGAN/")
+#test_Hoyer_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_Hoyer_NonNegConstraint, sparsity_weights = [0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.5, 1], sparsity_objectives = [0.6], latent_dimension=100, nb_epochs=500, 
+#                nb_input_channels=1, one_channel_output=True, add_original_images=True,
+#                AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, svm=False, 
+#                path_to_dir = "../Results/AsymAE_infoGAN/")
+
+
+##########Modification:in the path given to the function and where the results are stored
+
+###18_11_06
+###AsymAE_infoGAN with KLdiv sparsity regularizer and Non-Negative Contstrain on MNIST dataset
+test_KL_div_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint, sparsity_weights = sparsity_weights, sparsity_objectives = sparsity_objectives, latent_dimension=100, nb_epochs=500,
+                nb_input_channels=1, one_channel_output=True, add_original_images=False,
+                AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, svm=False,
+                path_to_dir = "../Results", dataset_fashion_MNIST=False)
+
