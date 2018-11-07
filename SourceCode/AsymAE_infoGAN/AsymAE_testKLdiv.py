@@ -18,17 +18,17 @@ def test_KL_div_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegCon
     else:
         original_images_train, _, original_images_test, y_test = bastien_utils.load_data_MNIST(train=True, test=True, subsetTest=False)        
         path_to_dir = path_to_dir + "/MNIST"
-    path_to_dir = path_to_dir + "/AsymAE_infoGAN"
+    path_to_dir = path_to_dir + "/AsymAE_infoGAN/"
     if (nb_input_channels>1):
         if AMD:
             if (add_original_images & (nb_input_channels>2)):
                 x_train = morphoMaths.AMD_in_one_array(original_images_train[:,:,:,0], levels=nb_input_channels-2, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
                 x_test = morphoMaths.AMD_in_one_array(original_images_test[:,:,:,0], levels=nb_input_channels-2, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
-                path_to_dir=path_to_dir+"/SeveralChannels/WithAMD"
+                path_to_dir=path_to_dir+"SeveralChannels/WithAMD/"
             else:
                 x_train = morphoMaths.AMD_in_one_array(original_images_train[:,:,:,0], levels=nb_input_channels-1, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
                 x_test = morphoMaths.AMD_in_one_array(original_images_test[:,:,:,0], levels=nb_input_channels-1, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
-                path_to_dir=path_to_dir+"/SeveralChannels/WithAMD_NoOriginals"
+                path_to_dir=path_to_dir+"SeveralChannels/WithAMD_NoOriginals/"
             x_train = bastien_utils.rescale_all_channels_between_0_and_1(x_train)
             x_test = bastien_utils.rescale_all_channels_between_0_and_1(x_test)
         else:
@@ -36,17 +36,17 @@ def test_KL_div_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegCon
                 if (add_original_images & (nb_input_channels>2)):
                     x_train = morphoMaths.positive_decomposition_by_openings_by_rec(original_images_train[:,:,:,0], levels=nb_input_channels-2, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
                     x_test = morphoMaths.positive_decomposition_by_openings_by_rec(original_images_test[:,:,:,0], levels=nb_input_channels-2, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
-                    path_to_dir=path_to_dir+"/SeveralChannels/WithPADO"
+                    path_to_dir=path_to_dir+"SeveralChannels/WithPADO/"
                 else:
                     x_train = morphoMaths.positive_decomposition_by_openings_by_rec(original_images_train[:,:,:,0], levels=nb_input_channels-1, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
                     x_test = morphoMaths.positive_decomposition_by_openings_by_rec(original_images_test[:,:,:,0], levels=nb_input_channels-1, step=AMD_step, init_step=AMD_init_step, add_original_images=add_original_images)
-                    path_to_dir=path_to_dir+"/SeveralChannels/WithPADO_NoOriginals"
+                    path_to_dir=path_to_dir+"SeveralChannels/WithPADO_NoOriginals/"
                 x_train = bastien_utils.rescale_all_channels_between_0_and_1(x_train)
                 x_test = bastien_utils.rescale_all_channels_between_0_and_1(x_test)    
             else:
                 x_train = np.tile(x_train, (1,1,1,nb_input_channels))
                 x_test = np.tile(x_test, (1,1,1,nb_input_channels))
-                path_to_dir=path_to_dir+"/SeveralChannels/NoAMD"
+                path_to_dir=path_to_dir+"SeveralChannels/NoAMD/"
     else:
         x_train=original_images_train
         x_test=original_images_test
@@ -57,11 +57,11 @@ def test_KL_div_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegCon
     strDims = 'dim' + str(latent_dimension) 
     strDate = d.strftime("%y_%m_%d")
     if AsymAE_class==Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint:
-        out_path = path_to_dir + "/Sparse_NonNeg/KLdivSum_NonNegConstraint/TestOutputs/" + strDate
+        out_path = path_to_dir + "Sparse_NonNeg/KLdivSum_NonNegConstraint/TestOutputs/" + strDate
     #elif AsymAE_class==SparseShallowAE_KL_sum:
     #    out_path = path_to_dir + "/Sparse/KL_div_sum/TestOutputs/" + strDate
     elif AsymAE_class==Sparse_NonNeg_AsymAEinfoGAN_KLsum_AsymDecay:
-        out_path = path_to_dir + "/Sparse_NonNeg/KLdivSum_AsymDecay/TestOutputs/" + strDate
+        out_path = path_to_dir + "Sparse_NonNeg/KLdivSum_AsymDecay/TestOutputs/" + strDate
     nb_sparsity_weights = len(sparsity_weights)
     nb_sparsity_objectives = len(sparsity_objectives)
     train_rec_errors = np.zeros((nb_sparsity_weights, nb_sparsity_objectives))
