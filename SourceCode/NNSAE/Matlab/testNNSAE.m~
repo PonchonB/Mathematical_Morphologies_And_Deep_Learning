@@ -20,7 +20,7 @@ beta = 0;           %beta [0..1] is the decay rate for positive weights
 %alpha = 1e-6;          
 %beta = 1e-6;
 
-numEpochs = 1;     %number of sweeps through data for learning
+numEpochs = 500;     %number of sweeps through data for learning
 lrateRO = 0.01;     %learning rate for synaptic plasticity of the read-out layer
 lrateIP = 0.001;    %learning rate for intrinsic plasticity
 
@@ -30,7 +30,9 @@ lrateIP = 0.001;    %learning rate for intrinsic plasticity
 data_path = '../../../../fashion_MNIST_matlab/fashion_MNIST_x_train.mat';
 [x_train, x_test] = load_mnist_fashion(data_path);
 %rescale data for better numeric performance
-%X = 0.25 * X;
+x_train = 0.25 * x_train;
+x_test = 0.25 * x_test;
+
 
 %% network creation
 net = NNSAE(inpDim, netDim);
@@ -50,9 +52,12 @@ end
 save('NNSAE', 'net')
 
 %% evaluating
-x_test_rec = net.apply(x_test)
-save('x_test')
+x_test_rec = net.apply(x_test);
+save('x_test_rec', 'x_test_rec')
 
+h_test = net.getEncoding(x_test);
+save('h_test', 'h_test')
 
-h_test = net.getEncoding(x_test)
+<
+save('W','W')
 
