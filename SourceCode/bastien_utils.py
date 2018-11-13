@@ -61,11 +61,11 @@ def load_data_MNIST(train=True, test=True, subsetTest=False, subsetSize=10):
     if train:
         (x_train, y_train), (x_test, y_test) = mnist.load_data()
         x_train = np.reshape(x_train, (len(x_train), 28, 28, 1))  # adapt this if using `channels_first` image data format
-        ret.append(x_train)
+        ret.append(x_train/255)
         ret.append(y_train)
         x_test = np.reshape(x_test, (len(x_test), 28, 28, 1))  # adapt this if using `channels_first` image data format
         if test:
-            ret.append(x_test)
+            ret.append(x_test/255)
             ret.append(y_test)
         if subsetTest:
             x_test_small = np.zeros((subsetSize, 28,28,1))
@@ -75,13 +75,13 @@ def load_data_MNIST(train=True, test=True, subsetTest=False, subsetSize=10):
                 c=i%10
                 x_test_small[i, :,:,:]=np.copy(x_test[y_test==c][np.random.randint(c_len[c])])
                 y_test_small[i] = c
-            ret.append(x_test_small)
+            ret.append(x_test_small/255)
             ret.append(y_test_small)
     else:
         (_, _), (x_test, y_test) = mnist.load_data()
         x_test = np.reshape(x_test, (len(x_test), 28, 28, 1))  # adapt this if using `channels_first` image data format
         if test:
-            ret.append(x_test)
+            ret.append(x_test/255)
             ret.append(y_test)
         if subsetTest:
             x_test_small = np.zeros((subsetSize, 28,28,1))
@@ -91,7 +91,7 @@ def load_data_MNIST(train=True, test=True, subsetTest=False, subsetSize=10):
                 c=i%10
                 x_test_small[i, :,:,:]=np.copy(x_test[y_test==c][np.random.randint(c_len[c])])
                 y_test_small[i] = c
-            ret.append(x_test_small)
+            ret.append(x_test_small/255)
             ret.append(y_test_small)
     return ret
 
