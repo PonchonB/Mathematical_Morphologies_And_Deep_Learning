@@ -66,7 +66,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_Hoyer_NonNegConstraint(AsymAEinfoGAN):
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
         self.autoencoder = Model(input_img, decoded)
-        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
+        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
 
     @classmethod
     def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/AsymAE_infoGAN/"):
@@ -180,7 +180,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_KL_AsymDecay(AsymAEinfoGAN):
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
         self.autoencoder = Model(input_img, decoded)
-        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
+        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
 
     @classmethod
     def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/AsymAE_infoGAN/"):
@@ -284,7 +284,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_KL_NonNegConstraint(AsymAEinfoGAN):
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
         self.autoencoder = Model(input_img, decoded)
-        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
+        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
 
     @classmethod
     def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/AsymAE_infoGAN/"):
@@ -393,7 +393,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_L1_AsymDecay(AsymAEinfoGAN):
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
         self.autoencoder = Model(input_img, decoded)
-        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
+        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
 
     @classmethod
     def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/AsymAE_infoGAN/"):
@@ -492,7 +492,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_L1_NonNegConstraint(AsymAEinfoGAN):
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
         self.autoencoder = Model(input_img, decoded)
-        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
+        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
 
     @classmethod
     def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/AsymAE_infoGAN/"):
@@ -604,7 +604,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_KLsum_AsymDecay(AsymAEinfoGAN):
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
         self.autoencoder = Model(input_img, decoded)
-        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
+        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
 
     @classmethod
     def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/AsymAE_infoGAN/"):
@@ -709,7 +709,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint(AsymAEinfoGAN):
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
         self.autoencoder = Model(input_img, decoded)
-        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
+        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
         
     @classmethod
     def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/AsymAE_infoGAN/"):
