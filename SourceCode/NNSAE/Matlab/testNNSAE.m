@@ -30,7 +30,9 @@ lrateIP = 0.001;    %learning rate for intrinsic plasticity
 data_path = '../../../../fashion_MNIST_matlab/fashion_MNIST_x_train.mat';
 [x_train, x_test] = load_mnist_fashion(data_path);
 %rescale data for better numeric performance
-%X = 0.25 * X;
+x_train = 0.25 * x_train;
+x_test = 0.25 * x_test;
+
 
 %% network creation
 net = NNSAE(inpDim, netDim);
@@ -50,9 +52,23 @@ end
 save('NNSAE', 'net')
 
 %% evaluating
-x_test_rec = net.apply(x_test);
-save('x_test_rec', 'x_test_rec')
+x_rec_test = net.apply(x_test);
+save('x_rec_test', 'x_rec_test')
+clear('x_rec_test')
 
 h_test = net.getEncoding(x_test);
 save('h_test', 'h_test')
+clear('h_test')
+
+W=net.W;
+save('W','W')
+clear('W')
+
+x_rec_train = net.apply(x_train);
+save('x_rec_train', 'x_rec_train')
+clear('x_rec_train')
+
+h_train = net.getEncoding(x_train);
+save('h_train', 'h_train')
+clear('h_train')
 
