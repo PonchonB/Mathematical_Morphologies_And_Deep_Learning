@@ -59,7 +59,7 @@ class AsymAEinfoGAN:
         encoded = self.encoder(input_img)
         decoded = self.decoder(encoded)
         self.autoencoder = Model(input_img, decoded)
-        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error')
+        self.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
         
     @classmethod
     def load(cls, model_name, custom_objects={}, path_to_model_directory="../Results/AsymAE_infoGAN/"):
