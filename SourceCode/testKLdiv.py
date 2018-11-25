@@ -57,6 +57,8 @@ def test_KL_div(ShallowAE_class=SparseShallowAE_KL_sum, sparsity_weights = [1], 
         out_path = path_to_dir + "/Sparse_NonNeg/KLdivSum_NonNegConstraint/TestOutputs/" + strDate
     elif ShallowAE_class==Sparse_NonNeg_ShallowAE_KLsum_AsymDecay:
         out_path = path_to_dir + "/Sparse_NonNeg/KLdivSum_AsymDecay/TestOutputs/" + strDate
+    elif ShallowAE_class ==Sparse_NonNeg_ShallowAE_MaxPlus_Between0and1Constraint:
+        out_path = path_to_dir + "/Sparse_NonNeg/KLdivSum_AsymDecay/TestOutputs/" + strDate
     nb_sparsity_weights = len(sparsity_weights)
     nb_sparsity_objectives = len(sparsity_objectives)
     train_rec_errors = np.zeros((nb_sparsity_weights, nb_sparsity_objectives))

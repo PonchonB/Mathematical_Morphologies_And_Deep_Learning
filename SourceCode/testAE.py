@@ -7,6 +7,7 @@ from nonNegShallowAE import NonNegShallowAE_NonNegConstraint
 import datetime
 import pandas as pd
 import morphoMaths
+from MaxPlusDecoder.ShallowAE_maxPlusDecoder.shallowAE_maxplus_NonNeg import NonNeg_ShallowAE_MaxPlus_Between0and1Constraint
 
 PATH_TO_DATA = "../"
 
@@ -59,7 +60,8 @@ def testDims(ShallowAE_class=ShallowAE, latent_dimensions=[100], nb_epochs=400, 
         out_path = path_to_dir + "/Sparse_NonNeg/KLdivSum_NonNegConstraint/TestOutputs/" + strDate
     elif ShallowAE_class==Sparse_NonNeg_ShallowAE_KLsum_AsymDecay:
         out_path = path_to_dir + "/Sparse_NonNeg/KLdivSum_AsymDecay/TestOutputs/" + strDate
-
+    elif ShallowAE_class==NonNeg_ShallowAE_MaxPlus_Between0and1Constraint:
+        out_path = path_to_dir + "/NonNegativity/Between0and1Constraint/TestOutputs/" + strDate
     else:
         out_path = path_to_dir + "/Simple/TestOutputs/" + strDate
     nb_run = len(latent_dimensions)
