@@ -3,6 +3,9 @@ import math
 import bastien_utils
 from sklearn.model_selection import GridSearchCV, StratifiedShuffleSplit, train_test_split
 from sklearn import svm
+from matplotlib import pyplot as plt
+from skimage import filters
+
 
 def reconstructions(atoms, encodings):
     """
@@ -44,6 +47,17 @@ def sparsity_Hoyer(encodings):
     sqrt = math.sqrt(latent_dim)
     sigma = (sqrt - (np.linalg.norm(encodings, ord=1, axis=1)/(np.linalg.norm(encodings, ord=2, axis=1)+0.0000001)))/(sqrt - 1)
     return np.mean(sigma)
+
+def plot_histograms_of_the_encoding(H):
+    """
+    Plots the histogram of each of the 10 first rows of H (nb_samples, nb_features), that is the encoding of each of the nb_samples images
+    """
+    nb_samples, nb_features = H.shape
+    plt.figure(figsize=(30, 4))
+    for i in range(10):
+        ax = plt.subplot(1, 10, i + 1)
+        ax.hist(H[i], bins=nb_features)
+    plt.show()    
 
 def max_approximation(atoms, encodings, operator, **kwargs):
     """
@@ -166,3 +180,87 @@ def sparsity_KL_divergence(encodings, sparsity_objective=0.01, sparsity_weight=1
     if not multiply_by_weight_penalty:
         sparsity_weight=1
     return sparsity_weight*np.sum(val)
+
+def mean_Otsu_binarization_threshold_using_majors_images(images, h_test_image, nb_images_to_use=10):
+    nb_images,_,_ = images.shape
+    thresholds = np.zeros(nb_images_to_use)
+    idx_sort = np.flip(np.argsort(h_test_image))
+    for i in range(nb_images_to_use):
+        thresholds[i] = filters.threshold_otsu(images[idx_sort[i]])
+    return np.mean(thresholds)
+
+def overlap_coef(A,B):
+    if (not np.any(A)) or (not np.any(B)):
+        #print("Warning: Two empty sets given in computation of jaccard index...returning 0...")
+        return 0
+    else:
+        A_union_B = np.logical_or(A,B)
+        A_inter_B = np.logical_and(A,B)
+        overlap_coef = np.sum(A_inter_B)/min(np.sum(A), np.sum(B))
+        return overlap_coef
+
+def pair_wise_mean_overlap_coef_of_binary_images(binary_images):
+    nb_images,_,_ = binary_images.shape
+    nb_pairs = nb_images*(nb_images-1)/2.
+    s = 0
+    for i in range(nb_images):
+        for j in range(i+1,nb_images):
+            s += overlap_coef(binary_images[i], binary_images[j])
+    return s/nb_pairs
+
+def pair_wise_mean_overlap_coef_of_weighted_atoms(atoms, h_test_image, nb_images_to_use_for_threshold_computation=10):
+    nb_atoms,nb_rows,nb_columns,_ = atoms.shape
+    weighted_atoms = np.dot(np.diag(h_test_image), atoms.reshape((nb_atoms,nb_rows*nb_columns))).reshape((nb_atoms,nb_rows,nb_columns))
+    binarization_theshold = mean_Otsu_binarization_threshold_using_majors_images(weighted_atoms, h_test_image, nb_images_to_use=nb_images_to_use_for_threshold_computation)
+    print('*****Otsu binarization  threshold : ', binarization_theshold,' ******')
+    bin_weighted_atoms = weighted_atoms > binarization_theshold
+    return pair_wise_mean_overlap_coef_of_binary_images(bin_weighted_atoms)
+
+def mean_overlap_coef_of_atoms_weighted_by_images_code(atoms, h_test, nb_images_to_use_for_threshold_computation=10):
+    nb_samples, _ = h_test.shape
+    s = 0
+    for i in range(nb_samples):
+        print('******Image: ', i, ' ******')
+        tmp = pair_wise_mean_overlap_coef_of_weighted_atoms(atoms, h_test[i], nb_images_to_use_for_threshold_computation=nb_images_to_use_for_threshold_computation)
+        s += tmp
+        print('***Mean overlap coef: ', tmp)
+        print('\n')
+    return s/nb_samples
+
+def jaccard_index(A,B):
+    if (not np.any(A)) and (not np.any(B)):
+        #print("Warning: Two empty sets given in computation of jaccard index...returning 0...")
+        return 0
+    else:
+        A_union_B = np.logical_or(A,B)
+        A_inter_B = np.logical_and(A,B)
+        jaccard_index = np.sum(A_inter_B)/np.sum(A_union_B)
+        return jaccard_index
+
+def pair_wise_mean_Jaccard_index_of_binary_images(binary_images):
+    nb_images,_,_ = binary_images.shape
+    nb_pairs = nb_images*(nb_images-1)/2.
+    s = 0
+    for i in range(nb_images):
+        for j in range(i+1,nb_images):
+            s += jaccard_index(binary_images[i], binary_images[j])
+    return s/nb_pairs
+
+def pair_wise_mean_Jaccard_index_of_weighted_atoms(atoms, h_test_image, nb_images_to_use_for_threshold_computation=10):
+    nb_atoms,nb_rows,nb_columns,_ = atoms.shape
+    weighted_atoms = np.dot(np.diag(h_test_image), atoms.reshape((nb_atoms,nb_rows*nb_columns))).reshape((nb_atoms,nb_rows,nb_columns))
+    binarization_theshold = mean_Otsu_binarization_threshold_using_majors_images(weighted_atoms, h_test_image, nb_images_to_use=nb_images_to_use_for_threshold_computation)
+    print('*****Otsu binarization  threshold : ', binarization_theshold,' ******')
+    bin_weighted_atoms = weighted_atoms > binarization_theshold
+    return pair_wise_mean_Jaccard_index_of_binary_images(bin_weighted_atoms)
+
+def mean_jaccard_index_of_atoms_weighted_by_images_code(atoms, h_test, nb_images_to_use_for_threshold_computation=10):
+    nb_samples, _ = h_test.shape
+    s = 0
+    for i in range(nb_samples):
+        print('******Image: ', i, ' ******')
+        tmp = pair_wise_mean_Jaccard_index_of_weighted_atoms(atoms, h_test[i], nb_images_to_use_for_threshold_computation=nb_images_to_use_for_threshold_computation)
+        s += tmp
+        print('***Mean Jaccard Index: ', tmp)
+        print('\n')
+    return s/nb_samples
