@@ -14,6 +14,8 @@ from AsymAE_infoGAN.nonNegSparseAsymAEinfoGAN import Sparse_NonNeg_AsymAEinfoGAN
 from AsymAE_infoGAN.AsymAE_infoGAN import AsymAEinfoGAN
 from AsymAE_infoGAN.AsymAE_testHoyer import test_Hoyer_Asym_AE
 
+from MaxPlusDecoder.ShallowAE_maxPlusDecoder.shallowAE_maxplus_NonNeg import NonNeg_ShallowAE_MaxPlus_Between0and1Constraint
+
 
 print("Keras version: ", keras.__version__)
 #dims = [1, 5, 10, 20, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 784]
@@ -230,8 +232,21 @@ sparsity_objectives = [0.01, 0.05, 0.1, 0.2]
 
 ###18_11_06
 ###AsymAE_infoGAN with KLdiv sparsity regularizer and Non-Negative Contstrain on MNIST dataset
-test_KL_div_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint, sparsity_weights = sparsity_weights, sparsity_objectives = sparsity_objectives, latent_dimension=100, nb_epochs=500,
-                nb_input_channels=1, one_channel_output=True, add_original_images=False,
-                AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, svm=False,
-                path_to_dir = "../Results", dataset_fashion_MNIST=False)
+#test_KL_div_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint, sparsity_weights = sparsity_weights, sparsity_objectives = sparsity_objectives, latent_dimension=100, nb_epochs=500,
+#                nb_input_channels=1, one_channel_output=True, add_original_images=False,
+#                AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, svm=False,
+#                path_to_dir = "../Results", dataset_fashion_MNIST=False)
+
+###18_11_12
+####AsymAE_infoGAN with KLdiv sparsity regularizer and NonNegConstraint on MNIST dataset REGULARIZED BETWEEN 0 AND 1 like fashionMNIST
+#test_KL_div_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint, sparsity_weights = sparsity_weights, sparsity_objectives = sparsity_objectives, latent_dimension=100, nb_epochs=500,
+#                nb_input_channels=1, one_channel_output=True, add_original_images=False,
+#                AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, svm=False,
+#                path_to_dir = "../Results", dataset_fashion_MNIST=False)
+
+###18_11_24
+####ShallowAE with MaxPlus Decoder and Between 0 and 1 constraint
+testDims(ShallowAE_class=NonNeg_ShallowAE_MaxPlus_Between0and1Constraint, latent_dimensions=[100], nb_epochs=100, nb_input_channels=1, one_channel_output=True,
+            AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, add_original_images=True,
+            svm=False, path_to_dir = "../Results/ShallowAE_MaxPlus/")
 
