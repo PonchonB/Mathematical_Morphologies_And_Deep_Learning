@@ -408,14 +408,17 @@ class ShallowAE:
         Regularizers are not included in the new model.
         """
         W = self.atom_images_decoder(add_bias=False, normalize=False)
-        b = self.decoder.get_weights()[1]
         W_op = np.copy(W)
-        if apply_to_bias:
-            b_op = b.reshape((self.nb_rows, self.nb_columns, self.nb_output_channels))
-        else:
-            b_op= np.copy(b)
-        for i in range(self.nb_output_channels):
+        try:
+            b = self.decoder.get_weights()[1]
             if apply_to_bias:
+                b_op = b.reshape((self.nb_rows, self.nb_columns, self.nb_output_channels))
+            else:
+                b_op= np.copy(b)
+        except IndexError:
+            b = None
+        for i in range(self.nb_output_channels):
+            if apply_to_bias and (b is not None):
                 b_op[:,:,i] = operator(b_op[:,:,i], **kwargs)
             for j in range(self.latent_dim):
                 W_op[j,:,:,i]=operator(W[j,:,:,i], **kwargs)
@@ -426,7 +429,10 @@ class ShallowAE:
         W_op = np.reshape(W_op, (self.latent_dim, self.nb_rows*self.nb_columns*self.nb_output_channels))
         if apply_to_bias:
             b_op=b_op.flatten()
-        AE.decoder.set_weights([W_op, b_op])
+        if b is None:
+            AE.decoder.set_weights([W_op])
+        else:
+            AE.decoder.set_weights([W_op, b_op])
         return AE
         
     def max_approximation_error(self, X, operator, original_images=None, apply_to_bias=False, **kwargs):

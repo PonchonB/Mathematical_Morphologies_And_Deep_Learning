@@ -18,7 +18,7 @@ from MaxPlusDecoder.max_plus_dense_layer import MaxPlusDense
 import custom_constraints
 import custom_regularizers
 
-class Sparse_NonNeg_ShallowAE_MaxPlus_KLsum_NonNegConstraint(ShallowAE):
+class Sparse_NonNeg_ShallowAE_MaxPlus_KLsum_Between0and1Constraint(ShallowAE):
     """
     General class for shallow encoders (one layer encoder and one layer decoder).
     Attributes: 
@@ -72,7 +72,7 @@ class Sparse_NonNeg_ShallowAE_MaxPlus_KLsum_NonNegConstraint(ShallowAE):
         Custom_objects is a dictionary resolving the names of all the custom objects used during the creation of the model. 
         Returns the autoencoder, the encoder and the decoders models, assuming the two latters are respectively the second and the third layer of the AE model.
         """
-        path_to_directory = path_to_model_directory + "Sparse_NonNeg/KLdivSum_NonNegConstraint/Models/"
+        path_to_directory = path_to_model_directory + "Sparse_NonNeg/KLdivSum_Between0and1Constraint/Models/"
         model_path = path_to_directory + model_name
         loaded_AE = cls()
         loaded_AE.autoencoder = load_model(model_path, custom_objects=dict({'MaxPlusDense':MaxPlusDense, 'KL_divergence_sum':custom_regularizers.KL_divergence_sum, 'Between_0_and_1':custom_constraints.Between_0_and_1}, **custom_objects))
@@ -93,12 +93,12 @@ class Sparse_NonNeg_ShallowAE_MaxPlus_KLsum_NonNegConstraint(ShallowAE):
         model_name: String or None, if specified, it is used as a suffix to the previous name.
         """
         d = datetime.date.today()
-        path_to_directory = path_to_model_directory + "Sparse_NonNeg/KLdivSum_NonNegConstraint/Models/"
+        path_to_directory = path_to_model_directory + "Sparse_NonNeg/KLdivSum_Between0and1Constraint/Models/"
         strDate = d.strftime("%y_%m_%d")
         if model_name is None:
-            model_path = path_to_directory + strDate + "_dim" + str(self.latent_dim) + "_KLdivSum_" + str(self.sparsity_weight) + "_" + str(self.sparsity_objective) + "_NonNegConstraint.h5"
+            model_path = path_to_directory + strDate + "_dim" + str(self.latent_dim) + "_KLdivSum_" + str(self.sparsity_weight) + "_" + str(self.sparsity_objective) + "_Between0and1Constraint.h5"
         else:
-            model_path = path_to_directory + strDate + "_dim" + str(self.latent_dim) + "_KLdivSum_" + str(self.sparsity_weight) + "_" + str(self.sparsity_objective) + "_NonNegConstraint" + model_name + ".h5"
+            model_path = path_to_directory + strDate + "_dim" + str(self.latent_dim) + "_KLdivSum_" + str(self.sparsity_weight) + "_" + str(self.sparsity_objective) + "_Between0and1Constraint" + model_name + ".h5"
         self.autoencoder.save(model_path)
 
     def get_parameters_value(self):
