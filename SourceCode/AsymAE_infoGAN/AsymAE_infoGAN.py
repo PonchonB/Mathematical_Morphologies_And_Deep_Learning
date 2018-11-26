@@ -442,15 +442,8 @@ class AsymAEinfoGAN:
         """
         Plots the histogram of the encoding of each of the images in X (nb_samples, nb_rows, nb_columns, nb_channels)
         """
-        H = self.encode(X)
-        fig, ax = plt.subplots(1, 10, figsize=(30, 4))
-        for i in range(10):
-            ax[i].hist(H[i], bins=self.latent_dim)
-        if save:
-            full_path=path_to_save+figure_name
-            fig.savefig(full_path, format='eps')
-        plt.show()
-
+        H = self.encode(X[:10])
+        metrics.plot_histograms_of_the_encoding(H, nb_features=self.latent_dim)
 
     def plot_histograms_of_the_decoder_atoms(self):
         """

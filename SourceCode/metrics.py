@@ -48,15 +48,20 @@ def sparsity_Hoyer(encodings):
     sigma = (sqrt - (np.linalg.norm(encodings, ord=1, axis=1)/(np.linalg.norm(encodings, ord=2, axis=1)+0.0000001)))/(sqrt - 1)
     return np.mean(sigma)
 
-def plot_histograms_of_the_encoding(H):
+def plot_histograms_of_the_encoding(H, nb_features=None):
     """
     Plots the histogram of each of the 10 first rows of H (nb_samples, nb_features), that is the encoding of each of the nb_samples images
     """
-    nb_samples, nb_features = H.shape
+    if nb_features is None:
+        _, nb_features = H.shape
+    nb_bins = max(nb_features, 10)
     plt.figure(figsize=(30, 4))
     for i in range(10):
         ax = plt.subplot(1, 10, i + 1)
-        ax.hist(H[i], bins=nb_features)
+        # ax.hist(H[i], bins=nb_features, range=(0,1))
+        ax.hist(H[i], bins=nb_bins, range=(0,1))
+        h_max = np.max(H[i])
+        plt.plot((h_max, h_max), (0, nb_features/4), 'r-')
     plt.show()    
 
 def max_approximation(atoms, encodings, operator, **kwargs):
