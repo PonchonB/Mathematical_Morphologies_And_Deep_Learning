@@ -1,7 +1,7 @@
 from __future__ import print_function
 import numpy as np
 from keras.models import Model, load_model
-from keras.layers import Input, Dense, Flatten, Reshape, LeakyReLU, BatchNormalization, Activation
+from keras.layers import Input, Dense, Flatten, Reshape, LeakyReLU, BatchNormalization, Activation, Dropout
 from keras import losses, regularizers, metrics
 import keras.utils 
 import h5py
@@ -48,7 +48,8 @@ class ShallowAE_MaxPlus(ShallowAE):
         encoded = Dense(latent_dim, activation='sigmoid')(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))
-        x = MaxPlusDense(self.nb_rows*self.nb_columns*self.nb_output_channels, use_bias=False)(encoded_img)
+        x = Dropout(0.2)(encoded_img)
+        x = MaxPlusDense(self.nb_rows*self.nb_columns*self.nb_output_channels, use_bias=False)(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')  
         encoded = self.encoder(input_img)

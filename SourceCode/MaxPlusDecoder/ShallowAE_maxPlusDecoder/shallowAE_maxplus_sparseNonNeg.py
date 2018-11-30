@@ -55,8 +55,9 @@ class Sparse_NonNeg_ShallowAE_MaxPlus_KLsum_Between0and1Constraint(ShallowAE):
                                                                                     rho=self.sparsity_objective))(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))
+        x = Dropout(0.2)(encoded_img)
         x = MaxPlusDense(self.nb_rows*self.nb_columns*self.nb_output_channels, use_bias=False,
-                            kernel_constraint=custom_constraints.Between_0_and_1())(encoded_img)
+                            kernel_constraint=custom_constraints.Between_0_and_1())(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')  
         encoded = self.encoder(input_img)

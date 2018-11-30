@@ -8,6 +8,7 @@ import datetime
 import pandas as pd
 import morphoMaths
 from MaxPlusDecoder.ShallowAE_maxPlusDecoder.shallowAE_maxplus_NonNeg import NonNeg_ShallowAE_MaxPlus_Between0and1Constraint
+from MaxPlusDecoder.ShallowAE_maxPlusDecoder.shallowAE_maxplus import ShallowAE_MaxPlus
 
 PATH_TO_DATA = "../"
 
