@@ -15,6 +15,8 @@ from AsymAE_infoGAN.AsymAE_infoGAN import AsymAEinfoGAN
 from AsymAE_infoGAN.AsymAE_testHoyer import test_Hoyer_Asym_AE
 
 from MaxPlusDecoder.ShallowAE_maxPlusDecoder.shallowAE_maxplus_NonNeg import NonNeg_ShallowAE_MaxPlus_Between0and1Constraint
+from MaxPlusDecoder.ShallowAE_maxPlusDecoder.shallowAE_maxplus_sparseNonNeg import Sparse_NonNeg_ShallowAE_MaxPlus_KLsum_Between0and1Constraint
+from MaxPlusDecoder.ShallowAE_maxPlusDecoder.shallowAE_maxplus import ShallowAE_MaxPlus
 
 
 print("Keras version: ", keras.__version__)
@@ -246,7 +248,46 @@ sparsity_objectives = [0.01, 0.05, 0.1, 0.2]
 
 ###18_11_24
 ####ShallowAE with MaxPlus Decoder and Between 0 and 1 constraint
-testDims(ShallowAE_class=NonNeg_ShallowAE_MaxPlus_Between0and1Constraint, latent_dimensions=[100], nb_epochs=100, nb_input_channels=1, one_channel_output=True,
+#testDims(ShallowAE_class=NonNeg_ShallowAE_MaxPlus_Between0and1Constraint, latent_dimensions=[100], nb_epochs=100, nb_input_channels=1, one_channel_output=True,
+#            AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, add_original_images=True,
+#            svm=False, path_to_dir = "../Results/ShallowAE_MaxPlus/")
+
+###18_11_24
+####ShallowAE with MaxPlus Decoder and Sparse (KLdivSum)/Between0and1 constraints
+#test_KL_div(ShallowAE_class=Sparse_NonNeg_ShallowAE_MaxPlus_KLsum_Between0and1Constraint, sparsity_weights = sparsity_weights, sparsity_objectives = sparsity_objectives, latent_dimension=100, nb_epochs=200, 
+#                nb_input_channels=1, one_channel_output=True, add_original_images=True,
+#                AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, svm=False, 
+#                path_to_dir = "../Results/ShallowAE_MaxPlus/")
+
+####18_11_26
+####ShallowAE with MaxPlus Decoder and Between 0 and 1 constraint - 500 epochs
+#testDims(ShallowAE_class=NonNeg_ShallowAE_MaxPlus_Between0and1Constraint, latent_dimensions=[100], nb_epochs=500, nb_input_channels=1, one_channel_output=True,
+#            AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, add_original_images=True,
+#            svm=False, path_to_dir = "../Results/ShallowAE_MaxPlus/")
+
+####18_11_26
+####ShallowAE with MaxPlus Decoder - No Constraints - 500 epochs
+#testDims(ShallowAE_class=ShallowAE_MaxPlus, latent_dimensions=[100], nb_epochs=500, nb_input_channels=1, one_channel_output=True,
+#            AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, add_original_images=True,
+#            svm=False, path_to_dir = "../Results/ShallowAE_MaxPlus/")
+
+####18_11_26
+####ShallowAE with MaxPlus Decoder and Sparse (KLdivSum)/Between0and1 constraints - 500 epochs
+#test_KL_div(ShallowAE_class=Sparse_NonNeg_ShallowAE_MaxPlus_KLsum_Between0and1Constraint, sparsity_weights = sparsity_weights, sparsity_objectives = sparsity_objectives, latent_dimension=100, nb_epochs=500, 
+#                nb_input_channels=1, one_channel_output=True, add_original_images=True,
+#                AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, svm=False, 
+#                path_to_dir = "../Results/ShallowAE_MaxPlus/")
+
+##### ADDITION OF A  DROPOUT LAYER BEFORE THE MAXPLUS LAYER (with rate dropping 0.2)
+
+####18_11_30
+####ShallowAE with MaxPlus Decoder - No Constraints - 500 epochs
+#testDims(ShallowAE_class=ShallowAE_MaxPlus, latent_dimensions=[100], nb_epochs=500, nb_input_channels=1, one_channel_output=True,
+#            AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, add_original_images=True,
+#            svm=False, path_to_dir = "../Results/ShallowAE_MaxPlus/")
+
+####18_11_30
+####ShallowAE with MaxPlus Decoder and Between 0 and 1 constraint - 500 epochs
+testDims(ShallowAE_class=NonNeg_ShallowAE_MaxPlus_Between0and1Constraint, latent_dimensions=[100], nb_epochs=500, nb_input_channels=1, one_channel_output=True,
             AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, add_original_images=True,
             svm=False, path_to_dir = "../Results/ShallowAE_MaxPlus/")
-
