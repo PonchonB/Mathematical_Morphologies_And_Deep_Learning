@@ -122,15 +122,22 @@ def apply_operator_to_all_images(operator, X, **kwargs):
             result[i,:,:,j]= operator(X[i, :,:,j], **kwargs)
     return result
 
-def plot_all_images(X, channel_to_plot=0, relative_intensity=True):
+def plot_all_images(X, channel_to_plot=0, same_intensity_scale=True, rescale_between_0_and_1=False):
     nb_samples, _, _, nb_channels =X.shape
+    if same_intensity_scale:
+        v_min = np.min(X)
+        v_max = np.max(X)
+        # if v_min == v_max:
+        #     X = np.zeros(X.shape)
+        # else:
+        #     X = (X - v_min)/(v_max - v_min)
+        # external_values={'vmin':0, 'vmax':1}
+        external_values={'vmin':v_min, 'vmax':v_max}
+    else:
+        external_values={}
     if (channel_to_plot >= nb_channels):
         print('Too big channel number...plotting channel 0 instead...')
         channel_to_plot=0
-    if relative_intensity==True:
-        external_values={}
-    else:
-        external_values={'vmin':0, 'vmax':1}
     n_columns = min(10, nb_samples)
     n_rows = int(nb_samples/10) +1   
     plt.figure(figsize=(n_columns*2,n_rows*2))
@@ -249,76 +256,3 @@ def plot_reconstructions(AE, X):
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)    
     plt.show()
-
-def plot_reconstruction_using_three_most_used_atoms_as_rgb(h_image, atoms):
-    _, nb_rows, nb_columns, _ = atoms.shape
-    idx_sort = np.flip(np.argsort(h_image))
-    major_h = h_image[idx_sort[:3]]
-    major_atoms = atoms[idx_sort[:3]].reshape((3, nb_rows*nb_columns))
-    rgb_image = np.swapaxes(np.dot(np.diag(major_h), major_atoms), 0, 1).reshape((nb_rows,nb_columns,3))
-    vmax=np.max(rgb_image)
-    rgb_image = rgb_image/vmax
-    plt.imshow(rgb_image)
-    plt.show()
-
-def progressive_reconstruction(h_image, atoms, number_of_steps=50):
-    nb_atoms, nb_rows, nb_columns, _ = atoms.shape
-    idx_sort = np.flip(np.argsort(h_image))
-    h_sort = h_image[idx_sort][:number_of_steps]
-    major_atoms = atoms[idx_sort[:number_of_steps]].reshape((number_of_steps, nb_rows*nb_columns))
-    partial_reconstructions = np.zeros((number_of_steps, nb_rows*nb_columns))
-    for i in range(number_of_steps):
-        partial_reconstructions[i,:] = np.dot(h_sort[:i+1], major_atoms[:i+1])
-    nb_max = np.max(partial_reconstructions)
-    nb_plot_rows = int(number_of_steps / 8) + int(number_of_steps%8 > 0)
-    plt.figure(figsize=(nb_plot_rows*3,8*3))
-    fig, axes = plt.subplots(nrows=nb_plot_rows, ncols=8, figsize=(8*2, nb_plot_rows*2))
-    i = 0
-    for ax in axes.flat:
-        ax.set_axis_off()
-        if i<number_of_steps:
-            im = ax.imshow(partial_reconstructions[i].reshape((nb_rows,nb_columns)), cmap='gray', vmin=0, vmax=nb_max)    
-        i += 1
-    fig.subplots_adjust(wspace=0.02, hspace=0.05)
-    cb_ax = fig.add_axes([0.92, 0.1, 0.02, 0.8])
-    cbar = fig.colorbar(im, cax=cb_ax)
-    plt.show()
-
-def plot_heat_map_of_overlapping_atoms(h_images, atoms, dilated_atoms=None, number_of_atoms=20, threshold=0.5):
-    nb_atoms, nb_rows, nb_columns, _ = atoms.shape
-    nb_samples_to_plot = min(h_images.shape[0], 8)
-    if dilated_atoms is None:
-        show_dilated_atoms = 1
-    else:
-        show_dilated_atoms = 2
-        heat_map_of_dilated_atoms = np.zeros((nb_samples_to_plot,nb_rows, nb_columns))
-    heat_map_of_atoms = np.zeros((nb_samples_to_plot,nb_rows, nb_columns))
-    for i in range(nb_samples_to_plot):
-        idx_sort = np.argsort(h_images[i])
-        major_atoms = atoms[idx_sort[-number_of_atoms:],:,:,0]
-        binary_atoms = major_atoms.reshape((number_of_atoms, nb_rows*nb_columns))>threshold
-        heat_map_of_atoms[i,:,:] = np.sum(binary_atoms, axis=0).reshape((28,28))
-        if show_dilated_atoms>1:
-            major_atoms = atoms_dil[idx_sort[-number_of_atoms:],:,:,0]
-            binary_atoms = major_atoms.reshape((number_of_atoms, nb_rows*nb_columns))>threshold
-            heat_map_of_dilated_atoms[i,:,:] = np.sum(binary_atoms, axis=0).reshape((28,28))
-    nb_max = max(np.max(heat_map_of_atoms), np.max(heat_map_of_dilated_atoms))
-    plt.figure(figsize=(nb_samples_to_plot*3,show_dilated_atoms*3))
-    fig, axes = plt.subplots(nrows=show_dilated_atoms, ncols=nb_samples_to_plot, figsize=(nb_samples_to_plot*2, show_dilated_atoms*2))
-    i = 0
-    for ax in axes.flat:
-        ax.set_axis_off()
-        if i<nb_samples_to_plot:
-            im = ax.imshow(heat_map_of_atoms[i].reshape((nb_rows,nb_columns)), cmap='hot', vmin=0, vmax=nb_max)    
-        if i>=nb_samples_to_plot:
-            im = ax.imshow(heat_map_of_dilated_atoms[i-nb_samples_to_plot].reshape((nb_rows,nb_columns)), cmap='hot', vmin=0, vmax=nb_max)    
-        i += 1
-    cb_ax = fig.add_axes([0.92, 0.1, 0.02, 0.8])
-    cbar = fig.colorbar(im, cax=cb_ax)
-    plt.show()
-
-def plot_10_most_used_atoms_for_an_image(h_image, atoms):
-    idx_sort = np.flip(np.argsort(h_image))
-    major_atoms = atoms[idx_sort[:10]]
-    print('Atoms associated with the 10 highest code coefficients of the image')
-    bastien_utils.plot_all_images(major_atoms)
