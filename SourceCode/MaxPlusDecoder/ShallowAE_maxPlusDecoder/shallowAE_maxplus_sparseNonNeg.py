@@ -1,7 +1,7 @@
 from __future__ import print_function
 import numpy as np
 from keras.models import Model, load_model
-from keras.layers import Input, Dense, Flatten, Reshape, LeakyReLU, BatchNormalization, Activation
+from keras.layers import Input, Dense, Flatten, Reshape, LeakyReLU, BatchNormalization, Activation, Dropout
 from keras import losses, regularizers, metrics
 import keras.utils 
 import h5py
