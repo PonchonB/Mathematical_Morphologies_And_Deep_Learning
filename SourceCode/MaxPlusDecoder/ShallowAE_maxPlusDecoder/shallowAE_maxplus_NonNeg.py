@@ -32,7 +32,7 @@ class NonNeg_ShallowAE_MaxPlus_Between0and1Constraint(ShallowAE):
         autoencoder: Model from keras.model, composed of two layers, the two previous attributes
     """
 
-    def __init__(self, latent_dim=100, nb_rows=28, nb_columns=28, nb_input_channels=1, one_channel_output=True):
+    def __init__(self, latent_dim=100, nb_rows=28, nb_columns=28, nb_input_channels=1, one_channel_output=True, dropout_rate=None):
         """
         Create and initialize an autoencoder.
         """
@@ -49,9 +49,13 @@ class NonNeg_ShallowAE_MaxPlus_Between0and1Constraint(ShallowAE):
         encoded = Dense(latent_dim, activation='sigmoid')(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))
-        x = Dropout(0.2)(encoded_img)
-        x = MaxPlusDense(self.nb_rows*self.nb_columns*self.nb_output_channels, use_bias=False,
-                            kernel_constraint=custom_constraints.Between_0_and_1())(x)
+        if dropout_rate is None:
+            x = MaxPlusDense(self.nb_rows*self.nb_columns*self.nb_output_channels, use_bias=False,
+                                kernel_constraint=custom_constraints.Between_0_and_1())(encoded_img)
+        else:
+            x = Dropout(dropout_rate)(encoded_img)
+            x = MaxPlusDense(self.nb_rows*self.nb_columns*self.nb_output_channels, use_bias=False,
+                                kernel_constraint=custom_constraints.Between_0_and_1())(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')  
         encoded = self.encoder(input_img)
@@ -112,7 +116,7 @@ class NonNeg_ShallowAE_MaxPlus_NonNegConstraint(ShallowAE):
         autoencoder: Model from keras.model, composed of two layers, the two previous attributes
     """
 
-    def __init__(self, latent_dim=100, nb_rows=28, nb_columns=28, nb_input_channels=1, one_channel_output=True):
+    def __init__(self, latent_dim=100, nb_rows=28, nb_columns=28, nb_input_channels=1, one_channel_output=True, dropout_rate=None):
         """
         Create and initialize an autoencoder.
         """
@@ -129,9 +133,13 @@ class NonNeg_ShallowAE_MaxPlus_NonNegConstraint(ShallowAE):
         encoded = Dense(latent_dim, activation='sigmoid')(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))
-        # x = Dropout(0.2)(encoded_img)
-        x = MaxPlusDense(self.nb_rows*self.nb_columns*self.nb_output_channels, use_bias=False,
-                            kernel_constraint=constraints.non_neg())(encoded_img)
+        if dropout_rate is None:
+            x = MaxPlusDense(self.nb_rows*self.nb_columns*self.nb_output_channels, use_bias=False,
+                                kernel_constraint=constraints.non_neg())(encoded_img)
+        else:
+            x = Dropout(dropout_rate)(encoded_img)
+            x = MaxPlusDense(self.nb_rows*self.nb_columns*self.nb_output_channels, use_bias=False,
+                                kernel_constraint=constraints.non_neg())(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')  
         encoded = self.encoder(input_img)

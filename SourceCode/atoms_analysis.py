@@ -94,7 +94,10 @@ def mean_Otsu_binarization_threshold_using_majors_atoms(atoms, h_test_image, nb_
     thresholds = np.zeros(nb_atoms_to_use)
     idx_sort = idx_to_sort_code_coefs_by_decreasing_value(h_test_image)
     for i in range(nb_atoms_to_use):
-        thresholds[i] = filters.threshold_otsu(atoms[idx_sort[i]])
+        if np.all(atoms[idx_sort[i]]==0):
+            thresholds[i] = 0
+        else:
+            thresholds[i] = filters.threshold_otsu(atoms[idx_sort[i]])
     return np.mean(thresholds)
 
 def binarized_weighted_atoms(atoms, h_test_image, nb_atoms_to_use_for_threshold_computation=20):
