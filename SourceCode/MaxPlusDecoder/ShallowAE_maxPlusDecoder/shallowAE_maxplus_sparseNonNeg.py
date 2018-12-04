@@ -34,7 +34,7 @@ class Sparse_NonNeg_ShallowAE_MaxPlus_KLsum_Between0and1Constraint(ShallowAE):
     """
 
     def __init__(self, latent_dim=100, nb_rows=28, nb_columns=28, nb_input_channels=1, one_channel_output=True,
-                    sparsity_weight=0.1, sparsity_objective=0.1):
+                    sparsity_weight=0.1, sparsity_objective=0.1, dropout_rate=None):
         """
         Create and initialize an autoencoder.
         """
@@ -55,9 +55,13 @@ class Sparse_NonNeg_ShallowAE_MaxPlus_KLsum_Between0and1Constraint(ShallowAE):
                                                                                     rho=self.sparsity_objective))(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))
-        x = Dropout(0.2)(encoded_img)
-        x = MaxPlusDense(self.nb_rows*self.nb_columns*self.nb_output_channels, use_bias=False,
-                            kernel_constraint=custom_constraints.Between_0_and_1())(x)
+        if dropout_rate is None:
+            x = MaxPlusDense(self.nb_rows*self.nb_columns*self.nb_output_channels, use_bias=False,
+                                kernel_constraint=custom_constraints.Between_0_and_1())(encoded_img)
+        else:
+            x = Dropout(dropout_rate)(encoded_img)
+            x = MaxPlusDense(self.nb_rows*self.nb_columns*self.nb_output_channels, use_bias=False,
+                                kernel_constraint=custom_constraints.Between_0_and_1())(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')  
         encoded = self.encoder(input_img)
@@ -122,7 +126,7 @@ class Sparse_NonNeg_ShallowAE_MaxPlus_KLsum_NonNegConstraint(ShallowAE):
     """
 
     def __init__(self, latent_dim=100, nb_rows=28, nb_columns=28, nb_input_channels=1, one_channel_output=True,
-                    sparsity_weight=0.1, sparsity_objective=0.1):
+                    sparsity_weight=0.1, sparsity_objective=0.1, dropout_rate=None):
         """
         Create and initialize an autoencoder.
         """
@@ -143,9 +147,13 @@ class Sparse_NonNeg_ShallowAE_MaxPlus_KLsum_NonNegConstraint(ShallowAE):
                                                                                     rho=self.sparsity_objective))(x)
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))
-        # x = Dropout(0.2)(encoded_img)
-        x = MaxPlusDense(self.nb_rows*self.nb_columns*self.nb_output_channels, use_bias=False,
-                            kernel_constraint=constraints.non_neg())(encoded_img)
+        if dropout_rate is None:
+            x = MaxPlusDense(self.nb_rows*self.nb_columns*self.nb_output_channels, use_bias=False,
+                                kernel_constraint=constraints.non_neg())(encoded_img)
+        else:
+            x = Dropout(dropout_rate)(encoded_img)
+            x = MaxPlusDense(self.nb_rows*self.nb_columns*self.nb_output_channels, use_bias=False,
+                                kernel_constraint=constraints.non_neg())(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')  
         encoded = self.encoder(input_img)
@@ -161,7 +169,7 @@ class Sparse_NonNeg_ShallowAE_MaxPlus_KLsum_NonNegConstraint(ShallowAE):
         Custom_objects is a dictionary resolving the names of all the custom objects used during the creation of the model. 
         Returns the autoencoder, the encoder and the decoders models, assuming the two latters are respectively the second and the third layer of the AE model.
         """
-        path_to_directory = path_to_model_directory + "Sparse_NonNeg/KLdivSum_NonNegConstraints/Models/"
+        path_to_directory = path_to_model_directory + "Sparse_NonNeg/KLdivSum_NonNegConstraint/Models/"
         model_path = path_to_directory + model_name
         loaded_AE = cls()
         loaded_AE.autoencoder = load_model(model_path, custom_objects=dict({'MaxPlusDense':MaxPlusDense, 'KL_divergence_sum':custom_regularizers.KL_divergence_sum}, **custom_objects))

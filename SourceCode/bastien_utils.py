@@ -122,11 +122,13 @@ def apply_operator_to_all_images(operator, X, **kwargs):
             result[i,:,:,j]= operator(X[i, :,:,j], **kwargs)
     return result
 
-def plot_all_images(X, channel_to_plot=0, same_intensity_scale=True, rescale_between_0_and_1=False):
+def plot_all_images(X, channel_to_plot=0, same_intensity_scale=True, v_min = None, v_max=None):
     nb_samples, _, _, nb_channels =X.shape
     if same_intensity_scale:
-        v_min = np.min(X)
-        v_max = np.max(X)
+        if v_min is None:
+            v_min = np.min(X)
+        if v_max is None:
+            v_max = np.max(X)
         # if v_min == v_max:
         #     X = np.zeros(X.shape)
         # else:
