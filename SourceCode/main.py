@@ -18,7 +18,7 @@ from MaxPlusDecoder.ShallowAE_maxPlusDecoder.shallowAE_maxplus_NonNeg import Non
 from MaxPlusDecoder.ShallowAE_maxPlusDecoder.shallowAE_maxplus_sparseNonNeg import Sparse_NonNeg_ShallowAE_MaxPlus_KLsum_Between0and1Constraint, Sparse_NonNeg_ShallowAE_MaxPlus_KLsum_NonNegConstraint
 from MaxPlusDecoder.ShallowAE_maxPlusDecoder.shallowAE_maxplus import ShallowAE_MaxPlus
 from MaxPlusDecoder.AsymAE_maxPlusDecoder.asymAE_maxplus import AsymAE_MaxPlus
-
+from MaxPlusDecoder.AsymAE_maxPlusDecoder.asymAE_maxplus_NonNeg import NonNeg_AsymAEinfoGAN_MaxPlus_NonNegConstraint
 
 print("Keras version: ", keras.__version__)
 #dims = [1, 5, 10, 20, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500, 784]
@@ -348,7 +348,12 @@ sparsity_objectives = [0.01, 0.05, 0.1, 0.2]
 
 ####18_12_11
 ####AsymAE_infoGAN with MaPlus Decoder - 500 epochs - No Dropout
-testDims(ShallowAE_class=AsymAE_MaxPlus, latent_dimensions=[100], nb_epochs=500, nb_input_channels=1, one_channel_output=True,
+# testDims(ShallowAE_class=AsymAE_MaxPlus, latent_dimensions=[100], nb_epochs=500, nb_input_channels=1, one_channel_output=True,
+            # AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, add_original_images=True,
+            # svm=False, path_to_dir = "../Results/AsymAE_MaxPlus/")
+
+####18_12_12
+####AsymAE_infoGAN with MaPlus Decoder - 500 epochs - No Dropout
+testDims(ShallowAE_class=NonNeg_AsymAEinfoGAN_MaxPlus_NonNegConstraint, latent_dimensions=[100], nb_epochs=500, nb_input_channels=1, one_channel_output=True,
             AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, add_original_images=True,
             svm=False, path_to_dir = "../Results/AsymAE_MaxPlus/")
-
