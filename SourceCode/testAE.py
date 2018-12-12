@@ -10,6 +10,7 @@ import morphoMaths
 from MaxPlusDecoder.ShallowAE_maxPlusDecoder.shallowAE_maxplus_NonNeg import NonNeg_ShallowAE_MaxPlus_Between0and1Constraint, NonNeg_ShallowAE_MaxPlus_NonNegConstraint
 from MaxPlusDecoder.ShallowAE_maxPlusDecoder.shallowAE_maxplus import ShallowAE_MaxPlus, ShallowAE_MaxMinus
 from MaxPlusDecoder.AsymAE_maxPlusDecoder.asymAE_maxplus import AsymAE_MaxPlus
+from MaxPlusDecoder.AsymAE_maxPlusDecoder.asymAE_maxplus_NonNeg import NonNeg_AsymAEinfoGAN_MaxPlus_NonNegConstraint
 
 PATH_TO_DATA = "../"
 
@@ -68,6 +69,8 @@ def testDims(ShallowAE_class=ShallowAE, latent_dimensions=[100], nb_epochs=400, 
         out_path = path_to_dir + "/NonNegativity/NonNegConstraint/TestOutputs/" + strDate
     elif ShallowAE_class==AsymAE_MaxPlus:
         out_path = path_to_dir + "/Simple/TestOutputs/" + strDate
+    elif ShallowAE_class==NonNeg_AsymAEinfoGAN_MaxPlus_NonNegConstraint:
+        out_path = path_to_dir + "/NonNegativity/NonNegConstraint/TestOutputs/" + strDate
     else:
         out_path = path_to_dir + "/Simple/TestOutputs/" + strDate
     nb_run = len(latent_dimensions)
