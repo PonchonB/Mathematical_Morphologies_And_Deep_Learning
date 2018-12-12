@@ -17,6 +17,7 @@ from AsymAE_infoGAN.AsymAE_testHoyer import test_Hoyer_Asym_AE
 from MaxPlusDecoder.ShallowAE_maxPlusDecoder.shallowAE_maxplus_NonNeg import NonNeg_ShallowAE_MaxPlus_Between0and1Constraint, NonNeg_ShallowAE_MaxPlus_NonNegConstraint
 from MaxPlusDecoder.ShallowAE_maxPlusDecoder.shallowAE_maxplus_sparseNonNeg import Sparse_NonNeg_ShallowAE_MaxPlus_KLsum_Between0and1Constraint, Sparse_NonNeg_ShallowAE_MaxPlus_KLsum_NonNegConstraint
 from MaxPlusDecoder.ShallowAE_maxPlusDecoder.shallowAE_maxplus import ShallowAE_MaxPlus
+from MaxPlusDecoder.AsymAE_maxPlusDecoder.asymAE_maxplus import AsymAE_MaxPlus
 
 
 print("Keras version: ", keras.__version__)
@@ -339,7 +340,15 @@ sparsity_objectives = [0.01, 0.05, 0.1, 0.2]
 
 ####18_12_04
 ####ShallowAE with MaxPlus Decoder and Sparse (KLdivSum)/NonNeg Constraint - 500 epochs - With 0.5 Dropout
-test_KL_div(ShallowAE_class= Sparse_NonNeg_ShallowAE_MaxPlus_KLsum_NonNegConstraint, sparsity_weights = sparsity_weights, sparsity_objectives = sparsity_objectives, latent_dimension=100, nb_epochs=500, 
-                nb_input_channels=1, one_channel_output=True, add_original_images=True,
-                AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, svm=False, 
-                path_to_dir = "../Results/ShallowAE_MaxPlus/", dropout_rate=0.5)
+#test_KL_div(ShallowAE_class= Sparse_NonNeg_ShallowAE_MaxPlus_KLsum_NonNegConstraint, sparsity_weights = sparsity_weights, sparsity_objectives = sparsity_objectives, latent_dimension=100, nb_epochs=500, 
+#                nb_input_channels=1, one_channel_output=True, add_original_images=True,
+#                AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, svm=False, 
+#                path_to_dir = "../Results/ShallowAE_MaxPlus/", dropout_rate=0.5)
+
+
+####18_12_11
+####AsymAE_infoGAN with MaPlus Decoder - 500 epochs - No Dropout
+testDims(ShallowAE_class=AsymAE_MaxPlus, latent_dimensions=[100], nb_epochs=500, nb_input_channels=1, one_channel_output=True,
+            AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, add_original_images=True,
+            svm=False, path_to_dir = "../Results/AsymAE_MaxPlus/")
+
