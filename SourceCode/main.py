@@ -12,6 +12,7 @@ from AsymAE_infoGAN.AsymAE_testKLdiv import test_KL_div_Asym_AE
 from AsymAE_infoGAN.nonNegSparseAsymAEinfoGAN import Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint, Sparse_NonNeg_AsymAEinfoGAN_Hoyer_NonNegConstraint
 
 from AsymAE_infoGAN.AsymAE_infoGAN import AsymAEinfoGAN
+from AsymAE_infoGAN.nonNeg_AsymAE_infoGAN import NonNegAsymAEinfoGAN_Asymmetric_decay, NonNegAsymAEinfoGAN_NonNegConstraint
 from AsymAE_infoGAN.AsymAE_testHoyer import test_Hoyer_Asym_AE
 
 from MaxPlusDecoder.ShallowAE_maxPlusDecoder.shallowAE_maxplus_NonNeg import NonNeg_ShallowAE_MaxPlus_Between0and1Constraint, NonNeg_ShallowAE_MaxPlus_NonNegConstraint
@@ -353,7 +354,13 @@ sparsity_objectives = [0.01, 0.05, 0.1, 0.2]
             # svm=False, path_to_dir = "../Results/AsymAE_MaxPlus/")
 
 ####18_12_12
-####AsymAE_infoGAN with MaPlus Decoder - 500 epochs - No Dropout
-testDims(ShallowAE_class=NonNeg_AsymAEinfoGAN_MaxPlus_NonNegConstraint, latent_dimensions=[100], nb_epochs=500, nb_input_channels=1, one_channel_output=True,
+####AsymAE_infoGAN with MaxPlus Decoder and NonNeg Constraint - 500 epochs - No Dropout
+# testDims(ShallowAE_class=NonNeg_AsymAEinfoGAN_MaxPlus_NonNegConstraint, latent_dimensions=[100], nb_epochs=500, nb_input_channels=1, one_channel_output=True,
+#             AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, add_original_images=True,
+#             svm=False, path_to_dir = "../Results/AsymAE_MaxPlus/")
+
+####18_12_13
+####AsymAEinfoGAN with NonNeg Constraint
+testDims_AsymAE(AsymAE_class=NonNegAsymAEinfoGAN_NonNegConstraint, latent_dimensions=[100], nb_epochs=500, nb_input_channels=1, one_channel_output=True,
             AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, add_original_images=True,
-            svm=False, path_to_dir = "../Results/AsymAE_MaxPlus/")
+            svm=False, path_to_dir = "../Results/AsymAE_infoGAN")

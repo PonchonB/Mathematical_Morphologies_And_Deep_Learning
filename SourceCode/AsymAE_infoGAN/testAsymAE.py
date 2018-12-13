@@ -4,6 +4,7 @@ from AsymAE_infoGAN.AsymAE_infoGAN import AsymAEinfoGAN
 import datetime
 import pandas as pd
 import morphoMaths
+from nonNeg_AsymAE_infoGAN import NonNegAsymAEinfoGAN_Asymmetric_decay, NonNegAsymAEinfoGAN_NonNegConstraint
 
 PATH_TO_DATA = "../"
 
@@ -48,6 +49,10 @@ def testDims_AsymAE(AsymAE_class=AsymAEinfoGAN, latent_dimensions=[100], nb_epoc
     d = datetime.date.today()
     strDims = str(latent_dimensions[0]) + "_" + str(latent_dimensions[-1]) 
     strDate = d.strftime("%y_%m_%d")
+    if AsymAE_class==AsymAEinfoGAN:
+        out_path = path_to_dir + "/Simple/TestOutputs/" + strDate
+    elif AsymAE_class==NonNegAsymAEinfoGAN_NonNegConstraint:
+        out_path = path_to_dir + "/NonNegativity/NonNegConstraint/TestOutputs/" + strDate
 #    if ShallowAE_class==SparseShallowAE_KL_sum:
 #        out_path = path_to_dir + "/Sparse/KL_div_sum/TestOutputs/" + strDate
 #    elif ShallowAE_class==NonNegShallowAE_NonNegConstraint:
@@ -57,7 +62,6 @@ def testDims_AsymAE(AsymAE_class=AsymAEinfoGAN, latent_dimensions=[100], nb_epoc
 #    elif ShallowAE_class==Sparse_NonNeg_ShallowAE_KLsum_AsymDecay:
 #        out_path = path_to_dir + "/Sparse_NonNeg/KLdivSum_AsymDecay/TestOutputs/" + strDate
 #    else:
-    out_path = path_to_dir + "/Simple/TestOutputs/" + strDate
     nb_run = len(latent_dimensions)
     train_rec_errors = np.zeros(nb_run)
     test_rec_errors = np.zeros(nb_run)
