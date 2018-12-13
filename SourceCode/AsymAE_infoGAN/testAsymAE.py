@@ -4,7 +4,7 @@ from AsymAE_infoGAN.AsymAE_infoGAN import AsymAEinfoGAN
 import datetime
 import pandas as pd
 import morphoMaths
-from nonNeg_AsymAE_infoGAN import NonNegAsymAEinfoGAN_Asymmetric_decay, NonNegAsymAEinfoGAN_NonNegConstraint
+from AsymAE_infoGAN.nonNeg_AsymAE_infoGAN import NonNegAsymAEinfoGAN_Asymmetric_decay, NonNegAsymAEinfoGAN_NonNegConstraint
 
 PATH_TO_DATA = "../"
 
