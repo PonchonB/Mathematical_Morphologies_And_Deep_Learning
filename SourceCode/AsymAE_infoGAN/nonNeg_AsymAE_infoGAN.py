@@ -12,7 +12,7 @@ import datetime
 import matplotlib.pyplot as plt
 import metrics
 import custom_regularizers
-from AsymAE_infoGAN import AsymAEinfoGAN
+from AsymAE_infoGAN.AsymAE_infoGAN import AsymAEinfoGAN
 
 class NonNegAsymAEinfoGAN_Asymmetric_decay(AsymAEinfoGAN):
     """
