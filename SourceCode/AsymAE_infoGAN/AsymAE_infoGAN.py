@@ -386,19 +386,22 @@ class AsymAEinfoGAN:
                 b_op[:,:,i] = operator(b_op[:,:,i], **kwargs)
             for j in range(self.latent_dim):
                 W_op[j,:,:,i]=operator(W[j,:,:,i], **kwargs)
-        AE = ShallowAE(latent_dim=self.latent_dim, nb_rows=self.nb_rows, nb_columns=self.nb_columns,  
-                        nb_input_channels=self.nb_input_channels, one_channel_output=(self.nb_output_channels==1))
-        W = self.encoder.get_weights()
-        AE.encoder.set_weights([np.copy(W[0]), np.copy(W[1])])
+        AE = AsymAEinfoGAN(latent_dim=self.latent_dim, nb_rows=self.nb_rows, nb_columns=self.nb_columns,  
+                            nb_input_channels=self.nb_input_channels, one_channel_output=(self.nb_output_channels==1))
+        AE.encoder=self.encoder
         W_op = np.reshape(W_op, (self.latent_dim, self.nb_rows*self.nb_columns*self.nb_output_channels))
-        if apply_to_bias:
-            b_op=b_op.flatten()
         if b is None:
             AE.decoder.set_weights([W_op])
         else:
+            if apply_to_bias:
+                b_op=b_op.flatten()
             AE.decoder.set_weights([W_op, b_op])
+        input_img = Input(shape=(self.nb_rows, self.nb_columns, self.nb_input_channels))  # adapt this if using `channels_first` image data format
+        encoded_img = AE.encoder(input_img)
+        decoded_img = AE.decoder(encoded_img)
+        AE.autoencoder = Model(input_img, decoded_img)
+        AE.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
         return AE
-
         
     def max_approximation_error(self, X, operator, original_images=None, apply_to_bias=False, **kwargs):
         """
