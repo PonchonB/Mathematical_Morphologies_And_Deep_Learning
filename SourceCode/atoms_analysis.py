@@ -162,7 +162,7 @@ def mean_of_function_on_all_pairs_of_weighted_atoms(function, atoms, h_test_imag
         weighted_atoms = binarized_weighted_atoms(atoms, h_test_image, nb_atoms_to_use_for_threshold_computation=nb_atoms_to_use_for_threshold_computation)[:,:,:,0]
     else:
         weighted_atoms = atoms_weighted_by_encoding_coefficients(atoms, h_test_image)[:,:,:,0]
-    return mean_of_function_on_all_pairs_of_images(function, weighted_atoms)
+    return mean_of_function_on_all_pairs_of_images(function, np.abs(weighted_atoms))
 
 # def pair_wise_mean_overlap_coef_of_weighted_atoms(atoms, h_test_image, nb_atoms_to_use_for_threshold_computation=20):
 #     bin_weighted_atoms = binarized_weighted_atoms(atoms, h_test_image, nb_atoms_to_use_for_threshold_computation=nb_atoms_to_use_for_threshold_computation)[:,:,:,0]
