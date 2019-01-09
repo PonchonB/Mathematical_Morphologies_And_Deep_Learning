@@ -11,6 +11,7 @@ from sklearn import svm
 import datetime
 import matplotlib.pyplot as plt
 import metrics
+import bastien_utils
 
 class AsymAEinfoGAN:
     """
@@ -202,7 +203,7 @@ class AsymAEinfoGAN:
             total_loss=loss_and_mse
         return total_loss
 
-    def plot_reconstructions(self, X_test, channel_to_plot=0, plot_input=True):
+    def plot_reconstructions(self, X_test, channel_to_plot=0, nb_to_plot=10, plot_input=True, same_scale_as_input=True):
         """
         Plots the original images, as well as their reconstructions by the autoencoder.
 
@@ -211,33 +212,24 @@ class AsymAEinfoGAN:
                     Only the 10 first samples will be plotted.
             channel_to_plot: int, the output_channel that will be plotted.
         """
-        if (channel_to_plot < self.nb_output_channels):
-            X_rec = self.reconstruction(X_test)[:,:,:,channel_to_plot]
+        shape_X = X_test.shape
+        if len(shape_X)==3:
+            X_test = X_test.reshape((1,) + shape_X)
+        X_rec = self.reconstruction(X_test[:nb_to_plot])
+        if same_scale_as_input:
+            try:
+                v_min = np.min(X_test[:nb_to_plot,:,:,channel_to_plot])
+                v_max = np.max(X_test[:nb_to_plot,:,:,channel_to_plot])
+            except IndexError:
+                v_min = np.min(X_test[:nb_to_plot,:,:,0])
+                v_max = np.max(X_test[:nb_to_plot,:,:,0])
         else:
-            print('Too big channel number...plotting channel 0 instead...')
-            channel_to_plot=0
-            X_rec = self.reconstruction(X_test)[:10,:,:,0]
+            v_min=None
+            v_max=None
         if plot_input:
-            nb_rows_plot=2
-        else:
-            nb_rows_plot=1
-        plt.figure(figsize=(20, 2*nb_rows_plot))
-        for i in range(10):
-            if plot_input:
-                # display original
-                ax = plt.subplot(2, 10, i + 1)
-                plt.imshow(X_test[i, :,:, channel_to_plot])
-                plt.gray()
-                ax.get_xaxis().set_visible(False)
-                ax.get_yaxis().set_visible(False)
-    
-            # display reconstruction
-            ax = plt.subplot(nb_rows_plot, 10, i + 1 + (nb_rows_plot - 1)*10)
-            plt.imshow(X_rec[i,:,:])
-            plt.gray()
-            ax.get_xaxis().set_visible(False)
-            ax.get_yaxis().set_visible(False)    
-        plt.show()
+            bastien_utils.plot_all_images(X_test[:nb_to_plot], channel_to_plot=channel_to_plot)
+        bastien_utils.plot_all_images(X_rec, channel_to_plot=channel_to_plot, v_min=v_min, v_max=v_max)
+
         
     def atom_images_decoder(self, add_bias=False, normalize=False):
         """
@@ -267,27 +259,13 @@ class AsymAEinfoGAN:
             add_bias: bool, whether to add the bias (784,) to the weights.
             normalize: bool. If True each image is normalized, giving the artificial input images that maximize each of the code coefficients (with unity energy). 
         """
-        if (channel_to_plot < self.nb_output_channels):
-            atoms = self.atom_images_decoder(add_bias=add_bias, normalize=normalize)[:,:,:,channel_to_plot]
-        else:
-            print('Too big channel number...plotting channel 0 instead...')
-            channel_to_plot=0
-            atoms = self.atom_images_decoder(add_bias=add_bias)[:,:,:,0]
+        atoms = self.atom_images_decoder(add_bias=add_bias, normalize=normalize)
         if (nb_to_plot<0):
             n_atoms =self.latent_dim
         else:
             n_atoms=nb_to_plot
-        n_columns = min(10, n_atoms)
-        n_rows = int(n_atoms/10) +1   
-        plt.figure(figsize=(n_columns*2,n_rows*2))
-        for i in range(n_atoms):
-            ax = plt.subplot(n_rows, n_columns, i + 1)
-            plt.imshow(atoms[i])
-            plt.gray()
-            ax.get_xaxis().set_visible(False)
-            ax.get_yaxis().set_visible(False)
-        plt.show()
-        
+        bastien_utils.plot_all_images(atoms[:n_atoms], channel_to_plot=channel_to_plot, same_intensity_scale=True)
+
     def best_SVM_classification_score(self, X, y, min_log_C=-2, max_log_C=3, nb_values_C=7, min_log_gamma=-3, max_log_gamma=2, nb_values_gamma=7):
         """
         Performs cross-validation and parameter seletion (grid search on the specified parameter) 
@@ -386,19 +364,22 @@ class AsymAEinfoGAN:
                 b_op[:,:,i] = operator(b_op[:,:,i], **kwargs)
             for j in range(self.latent_dim):
                 W_op[j,:,:,i]=operator(W[j,:,:,i], **kwargs)
-        AE = ShallowAE(latent_dim=self.latent_dim, nb_rows=self.nb_rows, nb_columns=self.nb_columns,  
-                        nb_input_channels=self.nb_input_channels, one_channel_output=(self.nb_output_channels==1))
-        W = self.encoder.get_weights()
-        AE.encoder.set_weights([np.copy(W[0]), np.copy(W[1])])
+        AE = AsymAEinfoGAN(latent_dim=self.latent_dim, nb_rows=self.nb_rows, nb_columns=self.nb_columns,  
+                            nb_input_channels=self.nb_input_channels, one_channel_output=(self.nb_output_channels==1))
+        AE.encoder=self.encoder
         W_op = np.reshape(W_op, (self.latent_dim, self.nb_rows*self.nb_columns*self.nb_output_channels))
-        if apply_to_bias:
-            b_op=b_op.flatten()
         if b is None:
             AE.decoder.set_weights([W_op])
         else:
+            if apply_to_bias:
+                b_op=b_op.flatten()
             AE.decoder.set_weights([W_op, b_op])
+        input_img = Input(shape=(self.nb_rows, self.nb_columns, self.nb_input_channels))  # adapt this if using `channels_first` image data format
+        encoded_img = AE.encoder(input_img)
+        decoded_img = AE.decoder(encoded_img)
+        AE.autoencoder = Model(input_img, decoded_img)
+        AE.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
         return AE
-
         
     def max_approximation_error(self, X, operator, original_images=None, apply_to_bias=False, **kwargs):
         """
