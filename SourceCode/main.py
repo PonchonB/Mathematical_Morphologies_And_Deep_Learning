@@ -361,6 +361,19 @@ sparsity_objectives = [0.01, 0.05, 0.1, 0.2]
 
 ####18_12_13
 ####AsymAEinfoGAN with NonNeg Constraint
-testDims_AsymAE(AsymAE_class=NonNegAsymAEinfoGAN_NonNegConstraint, latent_dimensions=[100], nb_epochs=500, nb_input_channels=1, one_channel_output=True,
-            AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, add_original_images=True,
-            svm=False, path_to_dir = "../Results/AsymAE_infoGAN")
+#testDims_AsymAE(AsymAE_class=NonNegAsymAEinfoGAN_NonNegConstraint, latent_dimensions=[100], nb_epochs=500, nb_input_channels=1, one_channel_output=True,
+#            AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, add_original_images=True,
+#            svm=False, path_to_dir = "../Results/AsymAE_infoGAN")
+
+####18_12_13
+####AsymAE_infoGAN with MaxPlus Decoder and NonNeg Constraint - 500 epochs - 50% Dropout
+#testDims(ShallowAE_class=NonNeg_AsymAEinfoGAN_MaxPlus_NonNegConstraint, latent_dimensions=[100], nb_epochs=500, nb_input_channels=1, one_channel_output=True,
+#             AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, add_original_images=True,
+#             svm=False, path_to_dir = "../Results/AsymAE_MaxPlus/Dropout50/", dropout_rate=0.5)
+
+####18_12_18
+####AsymAE_infoGAN with MaxPlus Decoder and NonNeg Constraint - 500 epochs - 50% Dropout
+testDims(ShallowAE_class=AsymAE_MaxPlus, latent_dimensions=[100], nb_epochs=500, nb_input_channels=1, one_channel_output=True,
+             AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, add_original_images=True,
+             svm=False, path_to_dir = "../Results/AsymAE_MaxPlus/Dropout50/", dropout_rate=0.5)
+
