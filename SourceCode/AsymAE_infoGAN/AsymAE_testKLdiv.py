@@ -11,7 +11,7 @@ PATH_TO_DATA = "../"
 def test_KL_div_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint, sparsity_weights = [1], sparsity_objectives = [0.1], latent_dimension=100, nb_epochs=500, 
                 nb_input_channels=1, one_channel_output=True, add_original_images=True,
                 AMD=False, PADO=True, AMD_step=1, AMD_init_step=1, svm=False, 
-                path_to_dir = "../Results", dataset_fashion_MNIST=True):
+                path_to_dir = "../Results", dataset_fashion_MNIST=True, **kwargs):
     if dataset_fashion_MNIST:
         original_images_train, _, original_images_test, y_test = bastien_utils.load_data_fashionMNIST(PATH_TO_DATA, train=True, test=True, subsetTest=False)
         path_to_dir = path_to_dir + "/fashion_MNIST"
@@ -81,7 +81,7 @@ def test_KL_div_Asym_AE(AsymAE_class=Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegCon
     for idx1, sp_w in enumerate(sparsity_weights):
         for idx2, sp_o in enumerate(sparsity_objectives):
             shAE = AsymAE_class(latent_dim=latent_dimension, sparsity_weight=sp_w, sparsity_objective=sp_o, 
-                                    nb_input_channels=nb_input_channels, one_channel_output=one_channel_output)
+                                    nb_input_channels=nb_input_channels, one_channel_output=one_channel_output, **kwargs)
             shAE.train(X_train=x_train, X_train_expected_output=original_images_train, nb_epochs=nb_epochs, 
                         X_val=(x_test, original_images_test), verbose=2)
             shAE.save(path_to_model_directory=path_to_dir)

@@ -100,7 +100,7 @@ class MaxPlusDense(Layer):
             bias = K.reshape(K.concatenate([K.reshape(self.bias, [1, -1]) ]*K.int_shape(output)[0], axis=0),(-1, self.units, 1))
             output = K.reshape(output, (-1, self.units, 1))
             output = K.concatenate([output, bias])
-            output = K.max(output, axis=-1)
+            output = K.min(output, axis=-1)
         if self.activation is not None:
             output = self.activation(output)
         return output

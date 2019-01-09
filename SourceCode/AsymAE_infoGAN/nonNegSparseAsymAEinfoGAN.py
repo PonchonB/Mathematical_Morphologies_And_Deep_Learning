@@ -26,7 +26,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_Hoyer_NonNegConstraint(AsymAEinfoGAN):
         sparsity_objective: float between 0 and 1 - the objective value for Hoyer metric, the greater the sparser.
     """
     def __init__(self, latent_dim=100, nb_rows=28, nb_columns=28, nb_input_channels=1, one_channel_output=True, 
-                    sparsity_weight=1, sparsity_objective=0.6):
+                    sparsity_weight=1, sparsity_objective=0.6, leakyReLU=True):
         """
         Create a sparse AsymAE (infoGAN encoder) AE with the custom Hoyer regularizer, enforcing weights non negativity with Keras NonNeg constraint.
         Arguments:
@@ -60,7 +60,8 @@ class Sparse_NonNeg_AsymAEinfoGAN_Hoyer_NonNegConstraint(AsymAEinfoGAN):
         encoded_img = Input(shape=(self.latent_dim,))  
         x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels, 
                     kernel_constraint=constraints.non_neg())(encoded_img)
-        x = LeakyReLU(alpha=0.1)(x)
+        if leakyReLU:
+            x = LeakyReLU(alpha=0.1)(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
         encoded = self.encoder(input_img)
@@ -132,7 +133,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_KL_AsymDecay(AsymAEinfoGAN):
 
     def __init__(self, latent_dim=100, nb_rows=28, nb_columns=28, nb_input_channels=1, one_channel_output=True, 
                     sparsity_weight=1, sparsity_objective=0.1, 
-                    decay_positive_weights=0, decay_negative_weights=1, decay_weight=1):
+                    decay_positive_weights=0, decay_negative_weights=1, decay_weight=1, leakyReLU=True): 
         """
         Create a sparse AsymAE (infoGAN encoder) AE with the custom kl divergence regularizer, enforcing weights non negativity with an asymmetric decay.
         Arguments:
@@ -174,7 +175,8 @@ class Sparse_NonNeg_AsymAEinfoGAN_KL_AsymDecay(AsymAEinfoGAN):
                     kernel_regularizer=custom_regularizers.asymmetric_weight_decay(alpha=self.decay_positive_weights, 
                                                                                     beta=self.decay_negative_weights, 
                                                                                     lam=self.decay_weight))(encoded_img)
-        x = LeakyReLU(alpha=0.1)(x)
+        if leakyReLU:
+            x = LeakyReLU(alpha=0.1)(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
         encoded = self.encoder(input_img)
@@ -244,7 +246,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_KL_NonNegConstraint(AsymAEinfoGAN):
         sparsity_objective: float between 0 and 1 - the sparsity parameter.
     """
     def __init__(self, latent_dim=100, nb_rows=28, nb_columns=28, nb_input_channels=1, one_channel_output=True, 
-                    sparsity_weight=1, sparsity_objective=0.1):
+                    sparsity_weight=1, sparsity_objective=0.1, leakyReLU=True): 
         """
         Create a sparse AsymAE (infoGAN encoder) AE with the custom kl divergence regularizer, enforcing weights non negativity with Keras NonNeg constraint.
         Arguments:
@@ -278,7 +280,8 @@ class Sparse_NonNeg_AsymAEinfoGAN_KL_NonNegConstraint(AsymAEinfoGAN):
         encoded_img = Input(shape=(self.latent_dim,))  
         x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels, 
                     kernel_constraint=constraints.non_neg())(encoded_img)
-        x = LeakyReLU(alpha=0.1)(x)
+        if leakyReLU:
+            x = LeakyReLU(alpha=0.1)(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
         encoded = self.encoder(input_img)
@@ -348,7 +351,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_L1_AsymDecay(AsymAEinfoGAN):
     """
 
     def __init__(self, latent_dim=100, nb_rows=28, nb_columns=28, nb_input_channels=1, one_channel_output=True, 
-                    sparsity_weight=1, decay_positive_weights=0, decay_negative_weights=1, decay_weight=1):
+                    sparsity_weight=1, decay_positive_weights=0, decay_negative_weights=1, decay_weight=1, leakyReLU=True): 
         """
         Create a sparse AsymAE (infoGAN encoder) AE with the custom kl divergence regularizer, enforcing Non Negativity with asymmetric weight decay.
         Arguments:
@@ -387,7 +390,8 @@ class Sparse_NonNeg_AsymAEinfoGAN_L1_AsymDecay(AsymAEinfoGAN):
                     kernel_regularizer=custom_regularizers.asymmetric_weight_decay(alpha=self.decay_positive_weights, 
                                                                                     beta=self.decay_negative_weights, 
                                                                                     lam=self.decay_weight))(encoded_img)
-        x = LeakyReLU(alpha=0.1)(x)
+        if leakyReLU:
+            x = LeakyReLU(alpha=0.1)(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
         encoded = self.encoder(input_img)
@@ -455,7 +459,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_L1_NonNegConstraint(AsymAEinfoGAN):
         sparsity_weight: positive float - the weight of the sparsity cost.
     """
     
-    def __init__(self, nb_rows=28, nb_columns=28, latent_dim=100, nb_input_channels=1, one_channel_output=True, sparsity_weight=1):
+    def __init__(self, nb_rows=28, nb_columns=28, latent_dim=100, nb_input_channels=1, one_channel_output=True, sparsity_weight=1, leakyReLU=True): 
         """
         Create a sparse AsymAE (infoGAN encoder) AE with the custom kl divergence regularizer.
         Arguments:
@@ -486,7 +490,8 @@ class Sparse_NonNeg_AsymAEinfoGAN_L1_NonNegConstraint(AsymAEinfoGAN):
         encoded_img = Input(shape=(self.latent_dim,))  
         x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels, 
                     kernel_constraint=constraints.non_neg())(encoded_img)
-        x = LeakyReLU(alpha=0.1)(x)
+        if leakyReLU:
+            x = LeakyReLU(alpha=0.1)(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
         encoded = self.encoder(input_img)
@@ -556,7 +561,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_KLsum_AsymDecay(AsymAEinfoGAN):
     """
 
     def __init__(self, latent_dim=100, nb_rows=28, nb_columns=28, nb_input_channels=1, one_channel_output=True, 
-                    sparsity_weight=0.1, sparsity_objective=0.1, decay_positive_weights=0, decay_negative_weights=1, decay_weight=1):
+                    sparsity_weight=0.1, sparsity_objective=0.1, decay_positive_weights=0, decay_negative_weights=1, decay_weight=1, leakyReLU=True): 
         """
         Create a sparse AsymAE (infoGAN encoder) AE with the custom kl divergence regularizer, enforcing weights non negativity with an asymmetric decay.
         Arguments:
@@ -598,7 +603,8 @@ class Sparse_NonNeg_AsymAEinfoGAN_KLsum_AsymDecay(AsymAEinfoGAN):
                     kernel_regularizer=custom_regularizers.asymmetric_weight_decay(alpha=self.decay_positive_weights, 
                                                                                     beta=self.decay_negative_weights, 
                                                                                     lam=self.decay_weight))(encoded_img)
-        x = LeakyReLU(alpha=0.1)(x)
+        if leakyReLU:
+            x = LeakyReLU(alpha=0.1)(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
         encoded = self.encoder(input_img)
@@ -669,7 +675,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint(AsymAEinfoGAN):
     """
 
     def __init__(self, latent_dim=100, nb_rows=28, nb_columns=28, nb_input_channels=1, one_channel_output=True, 
-                    sparsity_weight=0.1, sparsity_objective=0.1):
+                    sparsity_weight=0.1, sparsity_objective=0.1, leakyReLU=True): 
         """
         Create a sparse AsymAE (infoGAN encoder) AE with the custom kl divergence regularizer, enforcing weights non negativity with Keras NonNeg constraint.
         Arguments:
@@ -703,7 +709,8 @@ class Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint(AsymAEinfoGAN):
         encoded_img = Input(shape=(self.latent_dim,))  
         x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels, 
                     kernel_constraint=constraints.non_neg())(encoded_img)
-        x = LeakyReLU(alpha=0.1)(x)
+        if leakyReLU:
+            x = LeakyReLU(alpha=0.1)(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
         encoded = self.encoder(input_img)
