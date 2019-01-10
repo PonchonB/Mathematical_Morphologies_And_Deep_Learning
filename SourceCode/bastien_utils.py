@@ -122,7 +122,7 @@ def apply_operator_to_all_images(operator, X, **kwargs):
             result[i,:,:,j]= operator(X[i, :,:,j], **kwargs)
     return result
 
-def plot_all_images(X, channel_to_plot=0, same_intensity_scale=True, v_min = None, v_max=None):
+def plot_all_images(X, channel_to_plot=0, same_intensity_scale=True, v_min = None, v_max=None, save_as_eps=False, file_path='image.eps'):
     nb_samples, _, _, nb_channels =X.shape
     if same_intensity_scale:
         if v_min is None:
@@ -149,6 +149,8 @@ def plot_all_images(X, channel_to_plot=0, same_intensity_scale=True, v_min = Non
         plt.gray()
         ax.get_xaxis().set_visible(False)
         ax.get_yaxis().set_visible(False)
+    if save_as_eps:
+        plt.savefig(file_path, format='eps', dpi=1000)
     plt.show()
 
 def plot_histograms_of_values_by_channel(X):
