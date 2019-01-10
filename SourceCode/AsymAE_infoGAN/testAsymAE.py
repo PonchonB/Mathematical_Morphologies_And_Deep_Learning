@@ -10,7 +10,7 @@ PATH_TO_DATA = "../"
 
 def testDims_AsymAE(AsymAE_class=AsymAEinfoGAN, latent_dimensions=[100], nb_epochs=500, nb_input_channels=1, one_channel_output=True,
             AMD=False, PADO=False, AMD_step=1, AMD_init_step=1, add_original_images=True,
-            svm=False, path_to_dir = "../Results/AsymAE_infoGAN", **kwargs):
+            svm=False, path_to_dir = "../Results/AsymAE_infoGAN/", **kwargs):
     original_images_train, _, original_images_test, y_test = bastien_utils.load_data_fashionMNIST(PATH_TO_DATA, train=True, test=True, subsetTest=False)
     if (nb_input_channels>1):
         if AMD:

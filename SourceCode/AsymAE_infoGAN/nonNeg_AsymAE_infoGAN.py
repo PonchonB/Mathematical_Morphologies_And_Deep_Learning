@@ -188,7 +188,7 @@ class NonNegAsymAEinfoGAN_NonNegConstraint(AsymAEinfoGAN):
         model_name: String or None, if specified, it is used as a suffix to the previous name.
         """
         d = datetime.date.today()
-        path_to_directory = path_to_model_directory + "NonNegativity/NonNegConstraint/Models/"
+        path_to_directory = path_to_model_directory + "/NonNegativity/NonNegConstraint/Models/"
         strDate = d.strftime("%y_%m_%d")
         if model_name is None:
             model_path = path_to_directory + strDate + "_dim" + str(self.latent_dim) + "_NonNegConstraint.h5"
