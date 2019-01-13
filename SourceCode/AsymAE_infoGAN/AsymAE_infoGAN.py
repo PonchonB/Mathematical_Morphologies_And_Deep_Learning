@@ -173,19 +173,33 @@ class AsymAEinfoGAN:
         return self.autoencoder.evaluate(X_test, X_rec, verbose=0, batch_size=128)
 
 
-    def reconstruction_error(self, X_test, X_rec_th=None):
+    def reconstruction_error(self, X_test, X_rec_th=None, clipped_output=False, v_min=None, v_max=None):
         """
         Returns the mse between the reconstruction and the exected output.
         X_test: numpy array (nb_samples, nb_rows, nb_columns, nb_input_channels). Input of the autoencoder.
         X_rec_th: None or numpy array (nb_samples, nb_rows, nb_columns, nb_output_channels).
                     Expected reconstruction by the autoencoder. 
                     If None, X_test is used in place: all channels if nb_input_channels=nb_output_channels, first channel else. 
+        clipped_output: Bool, if true the reconstruction of the AE is clipped between two values, v_min and v_max if specified, min(x_test) and max(x_test) else
         """
-        loss_and_mse = self.loss_and_mse(X_test, X_rec_th=X_rec_th) 
-        try:
-            mse=loss_and_mse[1]
-        except IndexError:
-            mse=loss_and_mse
+        if clipped_output:
+            if v_min is None:
+                v_min = np.min(X_test)
+            if v_max is None:
+                v_max = np.max(X_test)
+            x_rec = np.clip(self.reconstruction(X_test), v_min, v_max)
+            if X_rec_th is None:
+                if (self.nb_output_channels==self.nb_input_channels):
+                    X_rec_th = X_test
+                else:
+                    X_rec_th = X_test[:,:,:,0].reshape((X_test.shape[0], self.nb_rows, self.nb_columns, 1)) 
+            mse = np.mean(np.square(x_rec - X_rec_th))
+        else:
+            loss_and_mse = self.loss_and_mse(X_test, X_rec_th=X_rec_th) 
+            try:
+                mse=loss_and_mse[1]
+            except IndexError:
+                mse=loss_and_mse
         return mse
         
     def total_loss(self, X_test, X_rec_th=None):
@@ -381,7 +395,7 @@ class AsymAEinfoGAN:
         AE.autoencoder.compile(optimizer='adadelta', loss='mean_squared_error', metrics=['mse'])
         return AE
         
-    def max_approximation_error(self, X, operator, original_images=None, apply_to_bias=False, **kwargs):
+    def max_approximation_error(self, X, operator, original_images=None, apply_to_bias=False, clipped_max_approx=False, v_min=None, v_max=None, **kwargs):
         """
         Computes the mse between the application of the operator to the images of X_rec (n_samples, n_rows, n_columns), 
         the application of the operator to the reconstructions of the images of X_rec by the autoencoder, and the decoding after 
@@ -405,8 +419,8 @@ class AsymAEinfoGAN:
         else:
             X_op = apply_operator_to_all_images(original_images)
         X_rec_op = apply_operator_to_all_images(X_rec)
-        error_To_Original = AE_op.reconstruction_error(X, X_rec_th=X_op)
-        error_To_Reconstruction = AE_op.reconstruction_error(X, X_rec_th=X_rec_op)
+        error_To_Original = AE_op.reconstruction_error(X, X_rec_th=X_op, clipped_output=clipped_max_approx, v_min=None, v_max=None)
+        error_To_Reconstruction = AE_op.reconstruction_error(X, X_rec_th=X_rec_op, clipped_output=clipped_max_approx, v_min=None, v_max=None)
         return error_To_Original, error_To_Reconstruction
 
     def sparsity_measure(self, X):
@@ -460,5 +474,9 @@ class AsymAEinfoGAN:
         H = self.encode(X)
         return metrics.sparsity_KL_divergence(H, sparsity_objective=sparsity_objective, sparsity_weight=sparsity_weight, multiply_by_weight_penalty=multiply_by_weight_penalty)
 
-
-
+    def copy_AE_weights(self, AE):
+        """
+        Copy the parameters of an already trained auto-encoder with the same architecture (eventually different regularizers)
+        """
+        self.encoder.set_weights(AE.encoder.get_weights())
+        self.decoder.set_weights(AE.decoder.get_weights())

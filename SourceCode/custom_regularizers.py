@@ -112,5 +112,3 @@ class asymmetric_weight_decay(Regularizer):
         return {'alpha': float(self.alpha),
                 'beta': float(self.beta),
                 'lam': float(self.lam)}
-
-    
