@@ -90,6 +90,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_Hoyer_NonNegConstraint(AsymAEinfoGAN):
         loaded_AE.nb_columns = loaded_AE.encoder.input_shape[2]        
         loaded_AE.sparsity_weight = loaded_AE.encoder.get_config()['layers'][-1]['config']['activity_regularizer']['config']['beta']
         loaded_AE.sparsity_objective = loaded_AE.encoder.get_config()['layers'][-1]['config']['activity_regularizer']['config']['sp_o']
+        loaded_AE.leakyReLU = (len(loaded_AE.decoder.layers) > 3)
         return loaded_AE
 
     def save(self, path_to_model_directory="../Results/AsymAE_infoGAN/", model_name=None):
@@ -208,6 +209,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_KL_AsymDecay(AsymAEinfoGAN):
         loaded_AE.decay_positive_weights = loaded_AE.decoder.get_config()['layers'][1]['config']['kernel_regularizer']['config']['alpha']
         loaded_AE.decay_negative_weights = loaded_AE.decoder.get_config()['layers'][1]['config']['kernel_regularizer']['config']['beta']
         loaded_AE.decay_weight = loaded_AE.decoder.get_config()['layers'][1]['config']['kernel_regularizer']['config']['lam']
+        loaded_AE.leakyReLU = (len(loaded_AE.decoder.layers) > 3)
         return loaded_AE
 
     def save(self, path_to_model_directory="../Results/AsymAE_infoGAN/", model_name=None):
@@ -310,6 +312,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_KL_NonNegConstraint(AsymAEinfoGAN):
         loaded_AE.nb_columns = loaded_AE.encoder.input_shape[2]        
         loaded_AE.sparsity_weight = loaded_AE.encoder.get_config()['layers'][-1]['config']['activity_regularizer']['config']['beta']
         loaded_AE.sparsity_objective = loaded_AE.encoder.get_config()['layers'][-1]['config']['activity_regularizer']['config']['rho']
+        loaded_AE.leakyReLU = (len(loaded_AE.decoder.layers) > 3)
         return loaded_AE
 
     def save(self, path_to_model_directory="../Results/AsymAE_infoGAN/", model_name=None):
@@ -422,6 +425,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_L1_AsymDecay(AsymAEinfoGAN):
         loaded_AE.decay_positive_weights = loaded_AE.decoder.get_config()['layers'][1]['config']['kernel_regularizer']['config']['alpha']
         loaded_AE.decay_negative_weights = loaded_AE.decoder.get_config()['layers'][1]['config']['kernel_regularizer']['config']['beta']
         loaded_AE.decay_weight = loaded_AE.decoder.get_config()['layers'][1]['config']['kernel_regularizer']['config']['lam']
+        loaded_AE.leakyReLU = (len(loaded_AE.decoder.layers) > 3)
         return loaded_AE
 
     def save(self, path_to_model_directory="../Results/AsymAE_infoGAN/", model_name=None):
@@ -519,6 +523,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_L1_NonNegConstraint(AsymAEinfoGAN):
         loaded_AE.nb_rows = loaded_AE.encoder.input_shape[1]
         loaded_AE.nb_columns = loaded_AE.encoder.input_shape[2]
         loaded_AE.sparsity_weight = loaded_AE.encoder.get_config()['layers'][-1]['config']['activity_regularizer']['config']['l1']
+        loaded_AE.leakyReLU = (len(loaded_AE.decoder.layers) > 3)
         return loaded_AE
 
     def save(self, path_to_model_directory="../Results/AsymAE_infoGAN/", model_name=None):
@@ -636,6 +641,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_KLsum_AsymDecay(AsymAEinfoGAN):
         loaded_AE.decay_positive_weights = loaded_AE.decoder.get_config()['layers'][1]['config']['kernel_regularizer']['config']['alpha']
         loaded_AE.decay_negative_weights = loaded_AE.decoder.get_config()['layers'][1]['config']['kernel_regularizer']['config']['beta']
         loaded_AE.decay_weight = loaded_AE.decoder.get_config()['layers'][1]['config']['kernel_regularizer']['config']['lam']
+        loaded_AE.leakyReLU = (len(loaded_AE.decoder.layers) > 3)
         return loaded_AE
 
     def save(self, path_to_model_directory="../Results/AsymAE_infoGAN/", model_name=None):
@@ -739,6 +745,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint(AsymAEinfoGAN):
         loaded_AE.nb_columns = loaded_AE.encoder.input_shape[2]
         loaded_AE.sparsity_weight = loaded_AE.encoder.get_config()['layers'][-1]['config']['activity_regularizer']['config']['beta']
         loaded_AE.sparsity_objective = loaded_AE.encoder.get_config()['layers'][-1]['config']['activity_regularizer']['config']['rho']
+        loaded_AE.leakyReLU = (len(loaded_AE.decoder.layers) > 3)
         return loaded_AE
 
     def save(self, path_to_model_directory="../Results/AsymAE_infoGAN/", model_name=None):
@@ -843,6 +850,7 @@ class Sparse_NonNeg_AsymAEinfoGAN_KLsum_NonNegConstraint_L1WeightsDecay(AsymAEin
         loaded_AE.sparsity_weight = loaded_AE.encoder.get_config()['layers'][-1]['config']['activity_regularizer']['config']['beta']
         loaded_AE.sparsity_objective = loaded_AE.encoder.get_config()['layers'][-1]['config']['activity_regularizer']['config']['rho']
         loaded_AE.l1_weight_decay = AE.decoder.get_config()['layers'][1]['config']['kernel_regularizer']['config']['l1']
+        loaded_AE.leakyReLU = (len(loaded_AE.decoder.layers) > 3)
         return loaded_AE
 
     def save(self, path_to_model_directory="../Results/AsymAE_infoGAN/", model_name=None):

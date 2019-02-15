@@ -28,7 +28,7 @@ class AsymAEinfoGAN:
         autoencoder: Model from keras.model, composed of two layers, the two previous attributes
     """
 
-    def __init__(self, latent_dim=100, nb_rows=28, nb_columns=28, nb_input_channels=1, one_channel_output=True):
+    def __init__(self, latent_dim=100, nb_rows=28, nb_columns=28, nb_input_channels=1, one_channel_output=True, leakyReLU=True):
         """
         Create and initialize an autoencoder.
         """
@@ -40,6 +40,7 @@ class AsymAEinfoGAN:
             self.nb_output_channels=1
         else:
             self.nb_output_channels=nb_input_channels
+        self.leakyReLU = leakyReLU
         input_img = Input(shape=(self.nb_rows, self.nb_columns, self.nb_input_channels))  # adapt this if using `channels_first` image data format
         x = Conv2D(64, (4, 4), strides=(2, 2), padding='same')(input_img)
         x = LeakyReLU(alpha=0.1)(x)
@@ -54,7 +55,8 @@ class AsymAEinfoGAN:
         self.encoder = Model(input_img, encoded, name='encoder')
         encoded_img = Input(shape=(self.latent_dim,))  
         x = Dense(self.nb_rows*self.nb_columns*self.nb_output_channels)(encoded_img)
-        x = LeakyReLU(alpha=0.1)(x)
+        if leakyReLU:
+            x = LeakyReLU(alpha=0.1)(x)
         decoded = Reshape((self.nb_rows,self.nb_columns,self.nb_output_channels))(x)
         self.decoder = Model(encoded_img, decoded, name='decoder')
         encoded = self.encoder(input_img)
@@ -81,6 +83,7 @@ class AsymAEinfoGAN:
         loaded_AE.nb_rows = loaded_AE.encoder.input_shape[1]
         loaded_AE.nb_columns = loaded_AE.encoder.input_shape[2]
         loaded_AE.nb_output_channels = loaded_AE.decoder.output_shape[-1]
+        loaded_AE.leakyReLU = (len(loaded_AE.decoder.layers) > 3)
         return loaded_AE
         
     def train(self, X_train, X_train_expected_output=None, nb_epochs=100, X_val=None, verbose=1):
@@ -379,7 +382,7 @@ class AsymAEinfoGAN:
             for j in range(self.latent_dim):
                 W_op[j,:,:,i]=operator(W[j,:,:,i], **kwargs)
         AE = AsymAEinfoGAN(latent_dim=self.latent_dim, nb_rows=self.nb_rows, nb_columns=self.nb_columns,  
-                            nb_input_channels=self.nb_input_channels, one_channel_output=(self.nb_output_channels==1))
+                            nb_input_channels=self.nb_input_channels, one_channel_output=(self.nb_output_channels==1), leakyReLU=self.leakyReLU)
         AE.encoder=self.encoder
         W_op = np.reshape(W_op, (self.latent_dim, self.nb_rows*self.nb_columns*self.nb_output_channels))
         if b is None:
